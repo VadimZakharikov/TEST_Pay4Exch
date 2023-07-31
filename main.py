@@ -68,16 +68,6 @@ def pay(message):
         if message.text:
             SUMM = message.text
             bot.send_message(message.chat.id, SUMM)
-    #bot.send_message(message.chat.id,"text")
-      
-    
-   # bot.register_next_step_handler(bot.send_message(message.chat.id, 'Укажите номер заявкиTest:'), NUMBER = message.text)
-  #  msg = bot.reply_to(message, 'Укажите номер заявкиTest:')
-   # bot.register_next_step_handler(msg, NUMBER = message.text)
-    
- #   bot.send_message(message.chat.id, "test")
-    #bot.send_message(message.chat.id, NUMBER)
-   # bot.register_next_step_handler(bot.send_message(message.chat.id, 'Укажите сумму для оплаты заявки: {NUMBER}'),  SUMM = message.text)
             keyboard = types.InlineKeyboardMarkup()
             keyboard.add(
                 types.InlineKeyboardButton(text='Да', callback_data='Да'),
@@ -135,6 +125,16 @@ def create_link(number, summ):
 # Кнопки подтверждения и отмемы
 # При отмене повтор, при подтверждении генерим ссылку
 
+    #bot.send_message(message.chat.id,"text")
+      
+    
+   # bot.register_next_step_handler(bot.send_message(message.chat.id, 'Укажите номер заявкиTest:'), NUMBER = message.text)
+  #  msg = bot.reply_to(message, 'Укажите номер заявкиTest:')
+   # bot.register_next_step_handler(msg, NUMBER = message.text)
+    
+ #   bot.send_message(message.chat.id, "test")
+    #bot.send_message(message.chat.id, NUMBER)
+   # bot.register_next_step_handler(bot.send_message(message.chat.id, 'Укажите сумму для оплаты заявки: {NUMBER}'),  SUMM = message.text)
 #    bot.send_message(id, f"Ссылка для оплаты картой:\nHttps://www.google.com")
 
 

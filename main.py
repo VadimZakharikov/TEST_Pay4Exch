@@ -51,9 +51,12 @@ def pay(message):
 #    doc_id = datetime.utcnow()
 #    id = message.from_user.id
 
-    bot.register_next_step_handler(bot.send_message(message.chat.id, 'Укажите номер заявкиTest:'), NUMBER = message.text)
+   # bot.register_next_step_handler(bot.send_message(message.chat.id, 'Укажите номер заявкиTest:'), NUMBER = message.text)
+    msg = bot.reply_to(message, 'Укажите номер заявкиTest:')
+    bot.register_next_step_handler(msg, NUMBER = message.text)
+    
     bot.send_message(message.chat.id, "test")
-    bot.send_message(message.chat.id, NUMBER)
+    #bot.send_message(message.chat.id, NUMBER)
     bot.register_next_step_handler(bot.send_message(message.chat.id, 'Укажите сумму для оплаты заявки: {NUMBER}'),  SUMM = message.text)
     keyboard = types.InlineKeyboardMarkup()
     keyboard.add(
@@ -73,7 +76,8 @@ def pay(message):
     else:
         bot.send_message(message.chat.id, 'Необходимо выбрать.')
 
-# ##########################################------------------------
+# ##########################################-
+
 def create_link(number, summ):
     parameters = {
     "ExtID":number,

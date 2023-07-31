@@ -68,7 +68,7 @@ def pay(message):
         if message.text:
             SUMM = message.text
             bot.send_message(message.chat.id, SUMM)
-            bot.register_next_step_handler(message.from_user.id, button)
+            bot.register_next_step_handler(message, button)
     def button(message):
         keyboard = types.InlineKeyboardMarkup()
         keyboard.add(

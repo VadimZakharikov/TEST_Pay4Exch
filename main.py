@@ -50,9 +50,12 @@ def pay(message):
 
 #    doc_id = datetime.utcnow()
 #    id = message.from_user.id
-    bot.register_next_step_handler(bot.send_message(message.chat.id, 'Укажите номер заявкиTest:'), NUMBER = message.text)
+    bot.register_next_step_handler(bot.send_message(message.chat.id, 'Укажите номер заявкиTest1:'), NUMBER = message.text)
     @bot.message_handler(content_types='text')
-    bot.send_message(message.chat.id,"text")
+    def message_reply(message):
+    if message.text:
+        bot.send_message(message.chat.id,"test")
+    #bot.send_message(message.chat.id,"text")
       
     
    # bot.register_next_step_handler(bot.send_message(message.chat.id, 'Укажите номер заявкиTest:'), NUMBER = message.text)

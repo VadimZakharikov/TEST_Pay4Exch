@@ -54,11 +54,12 @@ def pay(message):
    # @bot.message_handler(content_types='text')
     
        # if message.text:
-    bot.send_message(message.chat.id,"Укажите номер заявкиTest2:")
+    bot.send_message(message.chat.id,"Укажите номер заявкиTest3:")
     @bot.message_handler(content_types='text')
     def message_reply(message):
         if message.text:
             bot.send_message(message.chat.id,"WORK")
+            bot.send_message(message.chat.id,message.text)
     #bot.send_message(message.chat.id,"text")
       
     

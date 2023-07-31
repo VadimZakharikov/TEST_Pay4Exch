@@ -51,27 +51,59 @@ def pay(message):
 #    doc_id = datetime.utcnow()
 #    id = message.from_user.id
 
-    bot.register_next_step_handler(bot.send_message(message.chat.id, 'Укажите номер заявки:'), NUMBER = message.text)
-    bot.register_next_step_handler(bot.send_message(message.chat.id, f"Укажите сумму для оплаты заявки: {NUMBER}"),  SUMM = message.text)
+    bot.register_next_step_handler(bot.send_message(message.chat.id, 'Укажите номер заявки11111:'), NUMBER = message.text)
+    bot.register_next_step_handler(bot.send_message(message.chat.id, 'Укажите сумму для оплаты заявки: {NUMBER}'),  SUMM = message.text)
     keyboard = types.InlineKeyboardMarkup()
     keyboard.add(
     types.InlineKeyboardButton(text='Да', callback_data='Да'),
     types.InlineKeyboardButton(text='Нет', callback_data='Нет')
     )
     bot.register_next_step_handler(
-        bot.send_message(message.from_user.id, f"Сформировать ссылку для онлайн оплаты заявки {SUMM} на сумму {SUMM} ?",
+        bot.send_message(message.from_user.id, 'Сформировать ссылку для онлайн оплаты заявки {NUMBER} на сумму {SUMM} ?',
                          reply_markup=keyboard)
     )
     if message.text == 'Да':
 #        Генерируем ссылку TKB-Pay
-        bot.send_message(message.chat.id, f"Ссылка для оплаты картой:\nHttps://www.google.com")
+        response = create_link(str(NUMBER), str(SUMM));
+        bot.send_message(message.chat.id, f"Ссылка для оплаты картой:\n" + response[FormUrl])
     elif message.text == 'Нет':
         bot.send_message(message.chat.id, 'Отмена.')
     else:
         bot.send_message(message.chat.id, 'Необходимо выбрать.')
 
-#
+# ##########################################------------------------
+def create_link(number, summ):
+    parameters = {
+    "ExtID":number,
+    "Amount":summ,
+ #   "Description":"test from bot",
+#  //"ReturnURL":"http://site.ru_result",
+#  //"ClientInfo": {
+#    //             "Email":"test@test.com",
+#      //           "PhoneNumber": "+7 (911) 123-00-00"
+#        //        },
+#  //"TTL":"4.00:00:00",
+#  //"CartPositions":[{
+#    //               "Quantity":1.0,
+#      //             "Price":300000,
+#        //           "Tax":60,
+#          //         "Text":"Оплата по договору 123_test Иванова И.И.",
+#           //        "PaymentMethodType":4,
+#            //       "PaymentSubjectType":4
+#              //     }],
+# // "AdditionalParameters":{
+#   //                      "DogovorID":"12345_test"
+#     //                    }
 
+        
+    }
+    headers = {'Authorization': 'k6WRcPWcVCpuLPDJoJ7hYLDtsqZF6nMnD8UxKcqNCVyfkNJ1AYdbk35KCDyWZreJZc0L4g7mtvPcmxhPQ7eijKcJdj3gOCXkQZpiV66uZ1SZp2yevTf0n5zq8sHUm0GZGDvvh82SaTsr1nujVYV3w57UA8iDznh7u2sUGc5vZw0COhxW6x7wfNCLEL3iZztXMt583JMS2zeaeFfsMvFboU2RzQp5hXEzddZvmy1yUqDQHCF8FLFE3rK1zoJotQLe'}
+    responseJSON = requests.get("https://paytest.online.tkbbank.ru/api/v1/card/unregistered/debit", params = parameters, headers = headers)
+    response = json.load(responseJSON)
+    
+
+    return response
+    
 # Ждём номер заявки и записываем в number
 # Ждём сумму заявки и записываем в summ
 # Кнопки подтверждения и отмемы
@@ -86,27 +118,27 @@ def pay(message):
 # /api/v1/card/unregistered/debit
 
 # {
-#  "ExtID":"ID88618_176418_test8",
-#  "Amount":600000,
-#  "Description":"Оплата по договору 123_test Иванова И.И.",
-#  "ReturnURL":"http://site.ru_result",
-#  "ClientInfo": {
-#                 "Email":"test@test.com",
-#                 "PhoneNumber": "+7 (911) 123-00-00"
-#                },
-#  "TTL":"4.00:00:00",
-#  "CartPositions":[{
-#                   "Quantity":1.0,
-#                   "Price":300000,
-#                   "Tax":60,
-#                   "Text":"Оплата по договору 123_test Иванова И.И.",
-#                   "PaymentMethodType":4,
-#                   "PaymentSubjectType":4
-#                   }],
-#  "AdditionalParameters":{
-#                         "DogovorID":"12345_test"
-#                         }
-# }
+#  "ExtID":number,
+#  "Amount":summ,
+#  "Description":"test from bot",
+#  //"ReturnURL":"http://site.ru_result",
+#  //"ClientInfo": {
+#    //             "Email":"test@test.com",
+#      //           "PhoneNumber": "+7 (911) 123-00-00"
+#        //        },
+#  //"TTL":"4.00:00:00",
+#  //"CartPositions":[{
+#    //               "Quantity":1.0,
+#      //             "Price":300000,
+#        //           "Tax":60,
+#          //         "Text":"Оплата по договору 123_test Иванова И.И.",
+#           //        "PaymentMethodType":4,
+#            //       "PaymentSubjectType":4
+#              //     }],
+# // "AdditionalParameters":{
+#   //                      "DogovorID":"12345_test"
+#     //                    }
+# //}
 
 
 

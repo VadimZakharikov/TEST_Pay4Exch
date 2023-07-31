@@ -51,12 +51,13 @@ def pay(message):
 #    doc_id = datetime.utcnow()
 #    id = message.from_user.id
     
-        bot.send_message(message.chat.id, 'Укажите номер заявкиTest1:')
-        bot.register_next_step_handler(message, sum)
+        bot.send_message(message.chat.id, 'Укажите номер заявкиTest2:')
+        #bot.register_next_step_handler(message, sum)
 
-def sum(message):
-    text = message.text
-        bot.send_message(message.chat.id, "Неплохой выбор) {text}" +text)
+        @bot.message_handler(content_types='text')
+        def message_reply(message):
+            bot.send_message(message.chat.id, message.text)
+    
    # bot.register_next_step_handler(bot.send_message(message.chat.id, 'Укажите номер заявкиTest:'), NUMBER = message.text)
   #  msg = bot.reply_to(message, 'Укажите номер заявкиTest:')
    # bot.register_next_step_handler(msg, NUMBER = message.text)
@@ -86,8 +87,8 @@ def sum(message):
 
 def create_link(number, summ):
     parameters = {
-    "ExtID":number,
-    "Amount":summ,
+        "ExtID":number,
+        "Amount":summ,
  #   "Description":"test from bot",
 #  //"ReturnURL":"http://site.ru_result",
 #  //"ClientInfo": {

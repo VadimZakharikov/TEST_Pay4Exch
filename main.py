@@ -50,8 +50,8 @@ def pay(message):
 
 #    doc_id = datetime.utcnow()
 #    id = message.from_user.id
-    if message.text == '/start':
-        bot.send_message(message.chat.id, 'Укажите номер заявкиTest:')
+    
+        bot.send_message(message.chat.id, 'Укажите номер заявкиTest1:')
         bot.register_next_step_handler(message, sum)
 
 def sum(message):

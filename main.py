@@ -78,8 +78,8 @@ def pay(message):
                 )
             if message.text == 'Да':
 #        Генерируем ссылку TKB-Pay
-                response = create_link(str(NUMBER), str(SUMM));
-                bot.send_message(message.chat.id, f"Ссылка для оплаты картой:\n" + response[FormUrl])
+               # response = create_link(str(NUMBER), str(SUMM));
+             #   bot.send_message(message.chat.id, f"Ссылка для оплаты картой:\n" + response[FormUrl])
             elif message.text == 'Нет':
                 bot.send_message(message.chat.id, 'Отмена.')
             else:

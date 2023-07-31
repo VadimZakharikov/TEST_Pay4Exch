@@ -67,7 +67,7 @@ def pay(message):
     def sum(message):
         if message.text:
             SUMM = message.text
-            bot.send_message(message.chat.id, 'SUMM is ' + SUMM)
+            bot.send_message(message.chat.id, SUMM)
             keyboard = types.InlineKeyboardMarkup()
             keyboard.add(
                 types.InlineKeyboardButton(text='Да', callback_data='Да'),
@@ -76,14 +76,14 @@ def pay(message):
             bot.register_next_step_handler(
                 bot.send_message(message.from_user.id, 'Сформировать ссылку для онлайн оплаты заявки' + NUMBER + 'на сумму' + SUMM), reply_markup=keyboard)
                 )
-        if message.text == 'Да':
+            if message.text == 'Да':
 #        Генерируем ссылку TKB-Pay
-            response = create_link(str(NUMBER), str(SUMM));
-            bot.send_message(message.chat.id, f"Ссылка для оплаты картой:\n" + response[FormUrl])
-        elif message.text == 'Нет':
-            bot.send_message(message.chat.id, 'Отмена.')
-        else:
-            bot.send_message(message.chat.id, 'Необходимо выбрать.')
+                response = create_link(str(NUMBER), str(SUMM));
+                bot.send_message(message.chat.id, f"Ссылка для оплаты картой:\n" + response[FormUrl])
+            elif message.text == 'Нет':
+                bot.send_message(message.chat.id, 'Отмена.')
+            else:
+                bot.send_message(message.chat.id, 'Необходимо выбрать.')
 
 # ##########################################-
 

@@ -54,9 +54,8 @@ def pay(message):
         #bot.send_message(message.chat.id, 'Укажите номер заявкиTest2:')
         #bot.register_next_step_handler(message, sum)
 
-        @bot.message_handler(content_types='text')
-        def message_reply(message):
-            bot.send_message(message.chat.id, message.text)
+       # @bot.message_handler(content_types='text')
+
     
    # bot.register_next_step_handler(bot.send_message(message.chat.id, 'Укажите номер заявкиTest:'), NUMBER = message.text)
   #  msg = bot.reply_to(message, 'Укажите номер заявкиTest:')

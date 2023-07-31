@@ -47,7 +47,8 @@ def docnum(message):
 
 @bot.message_handler(commands=["pay"]) # Формирование онлайн оплаты
 def pay(message):
-
+    NUMBER = '0'
+    SUMM = '0'
 #    doc_id = datetime.utcnow()
 #    id = message.from_user.id
    # bot.register_next_step_handler(bot.send_message(message.chat.id, 'Укажите номер заявкиTest2:'), NUMBER = message.text)
@@ -76,7 +77,7 @@ def pay(message):
             types.InlineKeyboardButton(text='Нет', callback_data='Нет')
             )
         bot.register_next_step_handler(
-            bot.send_message(message.from_user.id, 'Сформировать ссылку для онлайн оплаты заявки' + NUMBER + 'на сумму' + SUMM), reply_markup=keyboard)
+            bot.send_message(message, 'Сформировать ссылку для онлайн оплаты заявки' + NUMBER + 'на сумму' + SUMM), reply_markup=keyboard)
             )
         if message.text == 'Да':
 #        Генерируем ссылку TKB-Pay

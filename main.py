@@ -78,7 +78,7 @@ def pay(message):
                 types.InlineKeyboardButton(text='Нет', callback_data='Нет')
             )
             bot.register_next_step_handler(
-                bot.send_message(message.from_user.id, 'Сформировать ссылку для онлайн оплаты заявки {NUMBER} на сумму {SUMM} ?',
+                bot.send_message(message.from_user.id, 'Сформировать ссылку для онлайн оплаты заявки' + NUMBER + 'на сумму {SUMM} ?',
                          reply_markup=keyboard)
             )
     if message.text == 'Да':

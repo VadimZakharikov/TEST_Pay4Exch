@@ -55,19 +55,19 @@ def pay(message):
    # @bot.message_handler(content_types='text')
     
        # if message.text:
-    bot.send_message(message.chat.id,"Укажите номер заявкиTest1:")
+    bot.send_message(message.chat.id,"Укажите номер заявкиTest2:")
     @bot.message_handler(content_types='text')
     def message_reply(message):
         if message.text:
             bot.send_message(message.chat.id,"WORK")
-            NUMBER = message.text
+            NUMBER = str(message.text)
             bot.send_message(message.chat.id, NUMBER)
            # @bot.message_handler(content_types='text')
             bot.send_message(message.chat.id, 'Укажите сумму для оплаты заявки ' + NUMBER)
             bot.register_next_step_handler(message, sum)
     def sum(message):
         if message.text:
-            SUMM = message.text
+            SUMM = str(message.text)
             bot.send_message(message.chat.id, SUMM)
             bot.send_message(message.chat.id, 'Сформировать ссылку для онлайн оплаты заявки' + NUMBER + 'на сумму' + SUMM)
            # bot.register_next_step_handler(message, button)

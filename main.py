@@ -55,7 +55,7 @@ def pay(message):
    # @bot.message_handler(content_types='text')
     
        # if message.text:
-    bot.send_message(message.chat.id,"Укажите номер заявкиTest2:")
+    bot.send_message(message.chat.id,"Укажите номер заявкиTest1:")
     @bot.message_handler(content_types='text')
     def message_reply(message):
         if message.text:
@@ -64,8 +64,8 @@ def pay(message):
             bot.send_message(message.chat.id, NUMBER)
            # @bot.message_handler(content_types='text')
             bot.send_message(message.chat.id, 'Укажите сумму для оплаты заявки ' + NUMBER)
-            bot.register_next_step_handler(message, sum)
-    def sum(message):
+            bot.register_next_step_handler(message, sum(NUMBER))
+    def sum(message, NUMBER):
         if message.text:
             SUMM = message.text
             bot.send_message(message.chat.id, SUMM)

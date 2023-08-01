@@ -41,7 +41,7 @@ def start(message):
 def docnum(message):
 
     doc_id = datetime.utcnow()
-    bot.reply_to(message, ("Номер документа: " + str(doc_id)))
+    bot.reply_to(message, ("Номер документа: " + str(d        oc_id)))
 
 # ##########################################------------------------
 @bot.message_handler(commands=["pay"])

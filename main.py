@@ -71,6 +71,7 @@ def get_summ(message, number):
 
 def confirm_payment(message, number, amount):
     if message.text == 'Да':
+        bot.send_message(message.chat.id, 'работает')
         bot.send_message(message.chat.id, 'Отлично!\\nСсылка на оплату:')
         bot.send_message(message.chat.id, f'<https://my-super-payment-gateway.com/pay?number={number}&amount={amount}>')
     else:

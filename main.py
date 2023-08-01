@@ -76,9 +76,9 @@ def pay(message):
             types.InlineKeyboardButton(text='Да', callback_data='Да'),
             types.InlineKeyboardButton(text='Нет', callback_data='Нет')
             )
-        bot.register_next_step_handler(
-            bot.send_message(message, 'Сформировать ссылку для онлайн оплаты заявки' + NUMBER + 'на сумму' + SUMM), reply_markup=keyboard)
-            )
+      #  bot.register_next_step_handler(
+         #   bot.send_message(message, 'Сформировать ссылку для онлайн оплаты заявки' + NUMBER + 'на сумму' + SUMM), reply_markup=keyboard)
+         #   )
         if message.text == 'Да':
 #        Генерируем ссылку TKB-Pay
             response = create_link(str(NUMBER), str(SUMM));

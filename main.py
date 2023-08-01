@@ -47,15 +47,15 @@ def docnum(message):
 
 @bot.message_handler(commands=["pay"]) # Формирование онлайн оплаты
 def pay(message):
-    NUMBER = '0'
-    SUMM = '0'
+    NUMBER = str('00')
+    SUMM = str('00')
 #    doc_id = datetime.utcnow()
 #    id = message.from_user.id
    # bot.register_next_step_handler(bot.send_message(message.chat.id, 'Укажите номер заявкиTest2:'), NUMBER = message.text)
    # @bot.message_handler(content_types='text')
     
        # if message.text:
-    bot.send_message(message.chat.id,"Укажите номер заявкиTest2:")
+    bot.send_message(message.chat.id,"Укажите номер заявкиTest1:")
     @bot.message_handler(content_types='text')
     def message_reply(message):
         if message.text:

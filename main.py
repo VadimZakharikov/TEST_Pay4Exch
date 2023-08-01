@@ -55,7 +55,7 @@ def pay(message):
    # @bot.message_handler(content_types='text')
     
        # if message.text:
-    bot.send_message(message.chat.id,"Укажите номер заявкиTest:")
+    bot.send_message(message.chat.id,"Укажите номер заявкиTest1:")
     @bot.message_handler(content_types='text')
     def message_reply(message):
         if message.text:
@@ -69,18 +69,21 @@ def pay(message):
         if message.text:
             SUMM = message.text
             bot.send_message(message.chat.id, SUMM)
+            bot.send_message(message, 'Сформировать ссылку для онлайн оплаты заявки' + NUMBER + 'на сумму' + SUMM)
             bot.register_next_step_handler(message, button)
    # @bot.message_handler(commands=['button'])
+            @bot.message_handler(commands=['button'])
     def button(message):
         keyboard = types.InlineKeyboardMarkup()
         keyboard.add(
             types.InlineKeyboardButton(text='Да', callback_data='Да'),
             types.InlineKeyboardButton(text='Нет', callback_data='Нет')
             )
+        bot.Send_Message(message, 'Сформировать ссылку для онлайн оплаты заявки' + NUMBER + 'на сумму' + SUMM, reply_markup=keyboard)
         #@bot.message_handler(commands=['button'])
-        bot.send_message(message, 'Сформировать ссылку для онлайн оплаты заявки' + NUMBER + 'на сумму' + SUMM)
+       
       #  bot.register_next_step_handler(
-         #   bot.send_message(message, 'Сформировать ссылку для онлайн оплаты заявки' + NUMBER + 'на сумму' + SUMM), reply_markup=keyboard)
+         #   Bot.Send_Message(message, 'Сформировать ссылку для онлайн оплаты заявки' + NUMBER + 'на сумму' + SUMM, reply_markup=keyboard)
          #   )
         if message.text == 'Да':
 #        Генерируем ссылку TKB-Pay

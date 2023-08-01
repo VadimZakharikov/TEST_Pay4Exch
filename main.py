@@ -70,10 +70,11 @@ def pay(message):
             SUMM = message.text
             bot.send_message(message.chat.id, SUMM)
             bot.send_message(message, 'Сформировать ссылку для онлайн оплаты заявки' + NUMBER + 'на сумму' + SUMM)
-            bot.register_next_step_handler(message, button)
+           # bot.register_next_step_handler(message, button)
    # @bot.message_handler(commands=['button'])
-            @bot.message_handler(commands=['button'])
+
     def button(message):
+        #@bot.message_handler(commands=['button'])
         keyboard = types.InlineKeyboardMarkup()
         keyboard.add(
             types.InlineKeyboardButton(text='Да', callback_data='Да'),
@@ -82,12 +83,12 @@ def pay(message):
         bot.Send_Message(message, 'Сформировать ссылку для онлайн оплаты заявки' + NUMBER + 'на сумму' + SUMM, reply_markup=keyboard)
         #@bot.message_handler(commands=['button'])
        
-      #  bot.register_next_step_handler(
-         #   Bot.Send_Message(message, 'Сформировать ссылку для онлайн оплаты заявки' + NUMBER + 'на сумму' + SUMM, reply_markup=keyboard)
-         #   )
+        bot.register_next_step_handler(
+            Bot.Send_Message(message, 'Сформировать ссылку для онлайн оплаты заявки' + NUMBER + 'на сумму' + SUMM, reply_markup=keyboard)
+            )
         if message.text == 'Да':
 #        Генерируем ссылку TKB-Pay
-            response = create_link(str(NUMBER), str(SUMM));
+            #response = create_link(str(NUMBER), str(SUMM));
             bot.send_message(message.chat.id, f"Ссылка для оплаты картой:\n" + response[FormUrl])
         elif message.text == 'Нет':
             bot.send_message(message.chat.id, 'Отмена.')

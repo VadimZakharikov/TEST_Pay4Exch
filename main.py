@@ -67,41 +67,14 @@ def get_summ(message, number):
         bot.register_next_step_handler(message, confirm_payment, number, amount)
     except ValueError:
         bot.send_message(message.chat.id, 'Неверный формат суммы. Попробуйте еще раз.')
-        bot.register_next_step_handler(message, get_summ, number)
+        bot.register_next_step_handler(message, get_number)
 
 def confirm_payment(message, number, amount):
-    if message.data == 'Да':
-      
-        payload = {
-            'ExtId': number,
-            'Amount': amount
-        }
-        headers = {
-            'Authorization': 'Bearer API_KEY'
-        }
-        response = requests.post('<https://gateway.example.com/api/v1/partner/orders>', json=payload, headers=headers)
-        if response.status_code == 200:
-           
-            bot.send_message(message.chat.id, 'Платеж проведен успешно.')
-        else:
-          
-            bot.send_message(message.chat.id, 'Не удалось провести платеж. Попробуйте еще раз.')
-            bot.send_message(message.chat.id, 'Укажите номер заявки:')
-            bot.register_next_step_handler(message, get_number)
-    elif message.data == 'Нет':
-     
-        bot.send_message(message.chat.id, 'Платеж отменен.')
-        bot.send_message(message.chat.id, 'Укажите номер заявки:')
-        bot.register_next_step_handler(message, get_number)
+    if message.text == 'Да':
+        bot.send_message(message.chat.id, 'Отлично!\\nСсылка на оплату:')
+        bot.send_message(message.chat.id, f'<https://my-super-payment-gateway.com/pay?number={number}&amount={amount}>')
     else:
-        # Неправильный ответ, запрашиваем подтверждение еще раз
-        keyboard = types.InlineKeyboardMarkup()
-        keyboard.add(
-            types.InlineKeyboardButton(text='Да', callback_data='Да'),
-            types.InlineKeyboardButton(text='Нет', callback_data='Нет')
-        )
-        bot.send_message(message.chat.id, 'Пожалуйста, подтвердите платеж.', reply_markup=keyboard)
-        bot.register_next_step_handler(message, confirm_payment, number, amount)
+        bot.send_message(message.chat.id, 'Оплата отменена.')
 
 
 

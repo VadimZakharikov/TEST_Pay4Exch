@@ -124,7 +124,7 @@ def confirm_payment(message, number, amount):
 #             bot.send_Message(message.chat.id, 'Сформировать ссылку для онлайн оплаты заявки' + NUMBER + 'на сумму' + SUMM, reply_markup=keyboard)
 #             )
 #         if message.text == 'Да':
-# #        Генерируем ссылку TKB-Pay
+# #       Генерируем ссылку TKB-Pay
 #             #response = create_link(str(NUMBER), str(SUMM));
 #             bot.send_message(message.chat.id, f"Ссылка для оплаты картой:\n" + response[FormUrl])
 #         elif message.text == 'Нет':

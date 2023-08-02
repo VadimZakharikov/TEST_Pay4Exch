@@ -46,8 +46,6 @@ def docnum(message):
 
 # ##########################################------------------------
 
-bot = telebot.TeleBot(config.BOT_TOKEN)
-
 def create_link(number, summ):
 
     parameters = dict(ExtID=number, Amount=summ, Description="test from bot", ReturnURL="http:site.ru_result",
@@ -141,7 +139,6 @@ def message_handler(message):
     else:
         bot.send_message(userid, "Простите, но я не знаю такую команду :<")
 
-bot.infinity_polling()
 
 #@bot.message_handler(commands=["pay"])
 #def pay(message):

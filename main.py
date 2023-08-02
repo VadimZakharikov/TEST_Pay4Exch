@@ -86,7 +86,7 @@ def end(message, kvatance):
         #bot.send_message(message.from_user.id,
         #                 f"Отлично! Ссылка: \nhttps://my-super-payment-gateway.com/pay?number={kvatance['id']}&amount={kvatance['price']}", reply_markup=ReplyKeyboardMarkup(resize_keyboard=True).add(*buttons))
         bot.send_message(message.from_user.id,
-                          f"Отлично!\n\n<i>{create_link(int(kvatance['id']), int(kvatance['price'] * 100))}</i>",
+                          f"Отлично!\n\n<i>{create_link(kvatance['id'], int(kvatance['price'] * 100))}</i>",
                           parse_mode="HTML", reply_markup=ReplyKeyboardMarkup(resize_keyboard=True).add(*buttons))
     else:
         buttons = ["Оплатить"]

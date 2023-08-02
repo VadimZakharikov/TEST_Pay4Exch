@@ -80,7 +80,10 @@ def first(message):
     except ValueError:
         bot.send_message(message.from_user.id, "Неверный формат! Попробуйте еще раз.")
         bot.register_next_step_handler_by_chat_id(message.chat.id, first)
-
+@bot.message_handler(commands=["pay"])
+def pay(message):
+    bot.send_message(message.chat.id, 'Укажите номер заявки:')
+    bot.register_next_step_handler(message, first)
 
 @bot.message_handler(content_types=['text'])
 def message_handler(message):

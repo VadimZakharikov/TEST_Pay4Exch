@@ -73,13 +73,9 @@ def second(message, dogovor):
 
 def first(message):
     dogovor = message.text
-    try:
-        dogovor = int(dogovor)
-        bot.send_message(message.from_user.id, f"Отлично, номер договора: {dogovor}\n\nТеперь введите сумму:")
-        bot.register_next_step_handler_by_chat_id(message.chat.id, second, dogovor)
-    except ValueError:
-        bot.send_message(message.from_user.id, "Неверный формат! Попробуйте еще раз.")
-        bot.register_next_step_handler_by_chat_id(message.chat.id, first)
+    bot.send_message(message.from_user.id, f"Отлично, номер договора: {dogovor}\n\nТеперь введите сумму:")
+    bot.register_next_step_handler_by_chat_id(message.chat.id, second, dogovor)
+   
 @bot.message_handler(commands=["pay"])
 def pay(message):
     bot.send_message(message.chat.id, 'Укажите номер заявки:')

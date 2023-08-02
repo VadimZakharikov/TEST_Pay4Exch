@@ -63,11 +63,13 @@ def create_link(number, summ):
             "DogovorID": "12345_test"
         })
     headers = {
-        'TCB-Header-Login': "PAT100002257ID",
-        'TCB-Header-Sign': "M2VlYjkxNzk1MDBjODdlNzA1NmUwMDRkNjM4YTc3MmYwZDRlNzM3Yw=="
+        'TCB-Header-Login': "T3678102697ID",
+        'TCB-Header-Sign': "azZXUmNQV2NWQ3B1TFBESm9KN2hZTER0c3FaRjZuTW5EOFV4S2NxTkNWeWZrTkoxQVlkYmszNUtDRHlXWnJlSlpjMEw0ZzdtdHZQY214aFBRN2VpaktjSmRqM2dPQ1hrUVpwaVY2NnVaMVNacDJ5ZXZUZjBuNXpxOHNIVW0wR1pHRHZ2aDgyU2FUc3IxbnVqVllWM3c1N1VBOGlEem5oN3Uyc1VHYzV2WncwQ09oeFc2eDd3Zk5DTEVMM2laenRYTXQ1ODNKTVMyemVhZUZmc012RmJvVTJSelFwNWhYRXpkZFp2bXkxeVVxRFFIQ0Y4RkxGRTNySzF6b0pvdFFMZQ=="
     }
-    responseJSON = requests.post("https://pay.tkbbank.ru/testgate/api/tcbpay/gate/registerorderfromcardtocard", params=parameters,
+    print(headers)
+    responseJSON = requests.get("https://paytest.online.tkbbank.ru/api/v1/card/registered/debi", params=parameters,
                                 headers=headers)
+    print(responseJSON.text)
     response = responseJSON.json()
     #hello
     par = {"InputString": "Тест"}
@@ -79,14 +81,17 @@ def create_link(number, summ):
     else:
         return f"Ссылка: {response['URL']}"
 
-
+@bot.message_handler(commands=["pay"])
+def pay(message):
+    bot.send_message(message.chat.id, 'Укажите номер заявки:')
+    bot.register_next_step_handler(message, first)
 def end(message, kvatance):
     if message.text == "Да":
         buttons = ["Оплатить"]
         #bot.send_message(message.from_user.id,
         #                 f"Отлично! Ссылка: \nhttps://my-super-payment-gateway.com/pay?number={kvatance['id']}&amount={kvatance['price']}", reply_markup=ReplyKeyboardMarkup(resize_keyboard=True).add(*buttons))
         bot.send_message(message.from_user.id,
-                          f"Отлично!\n\n<i>{create_link(kvatance['id'], int(kvatance['price'] * 100))}</i>",
+                          f"Отлично!\n\n<i>{create_link(str(kvatance['id']) , int(kvatance['price']) * 100)}</i>",
                           parse_mode="HTML", reply_markup=ReplyKeyboardMarkup(resize_keyboard=True).add(*buttons))
     else:
         buttons = ["Оплатить"]
@@ -94,17 +99,31 @@ def end(message, kvatance):
                          reply_markup=ReplyKeyboardMarkup(resize_keyboard=True).add(*buttons))
         return
 
-
+@bot.callback_query_handler(func=lambda call: True)
+def callback_inline(call):
+    if call.data == 'yes':
+        buttons = ["Оплатить"]
+        bot.send_message(call.from_user.id,
+                         f"Отлично!\n\n<i>{create_link(str(kvatance['id']), int(kvatance['price']) * 100)}</i>",
+                         parse_mode="HTML", reply_markup=ReplyKeyboardMarkup(resize_keyboard=True).add(*buttons))
+        return
+    elif call.data == 'no':
+       buttons = ["Оплатить"]
+       bot.send_message(call.from_user.id, "Оплата отменена!",
+                        reply_markup=ReplyKeyboardMarkup(resize_keyboard=True).add(*buttons))
+       return
 def second(message, dogovor):
     summa = message.text
+    global kvatance
     try:
         summa = float(summa)
-        buttons = ["Да", "Нет"]
+        btn1 = InlineKeyboardButton("Ок", callback_data="yes")
+        btn2 = InlineKeyboardButton("Отмена", callback_data="no")
         kvatance = {"id": dogovor, "price": summa}
         bot.send_message(message.from_user.id,
                          f"Квитанция: <i>{dogovor}</i>\nСумма: <i>{summa} руб.</i>\n\n<b>Все верно?</b>",
-                         parse_mode="HTML", reply_markup=ReplyKeyboardMarkup(resize_keyboard=True).add(*buttons)),
-        bot.register_next_step_handler_by_chat_id(message.chat.id, end, kvatance)
+                         parse_mode="HTML", reply_markup=InlineKeyboardMarkup().add(btn1, btn2)),
+        #bot.register_next_step_handler_by_chat_id(message.chat.id, end, kvatance)
     except ValueError:
         bot.send_message(message.from_user.id, "Неверный формат! Попробуйте еще раз.")
         bot.register_next_step_handler_by_chat_id(message.chat.id, second, dogovor)

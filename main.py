@@ -45,7 +45,6 @@ def docnum(message):
     bot.reply_to(message, ("Номер документа: " + str(doc_id)))
 
 # ##########################################------------------------
-
 def create_link(number, summ):
     parameters = dict(ExtID=number, Amount=summ, Description="test from bot",
                       ClientInfo={
@@ -69,40 +68,32 @@ def create_link(number, summ):
         'TCB-Header-Sign': signature_base64,
         "Content-Type": "application/json; charset=utf-8"
     }
-    responseJSON = requests.get("https://paytest.online.tkbbank.ru/api/v1/card/registered/debit",
+    responseJSON = requests.get("https://paytest.online.tkbbank.ru/api/v1/card/unregistered/debit",
                                 data=json.dumps(parameters, ensure_ascii=False).encode('utf-8'),
                                 headers=headers)
     response = responseJSON.json()
-    if "Error" in response:
-        return f"Ошибка! {response['Code']}"
-    else:
-        return f"Ссылка: {response['FormURL']}"
+    print(response)
+    return f"Ссылка: {response['FormURL']}"
 
 
 @bot.message_handler(commands=["pay"])
 def pay(message):
     bot.send_message(message.chat.id, 'Укажите номер заявки:')
     bot.register_next_step_handler(message, first)
-
-
-def end(message, kvatance):
-    if message.text == "Да":
-        buttons = ["Оплатить"]
-        bot.send_message(message.from_user.id,
-                         f"Отлично!\n\n<i>{create_link(str(kvatance['id']), float(kvatance['price']) * 100)}</i>",
-                         parse_mode="HTML", reply_markup=ReplyKeyboardMarkup(resize_keyboard=True).add(*buttons))
-    else:
-        buttons = ["Оплатить"]
-        bot.send_message(message.from_user.id, "Оплата отменена!",
-                         reply_markup=ReplyKeyboardMarkup(resize_keyboard=True).add(*buttons))
-        return
-
+@bot.message_handler(commands=["start"])
+def start(message):
+    buttons = ["Оплатить"]
+    bot.send_message(message.from_user.id,
+                     f"Привет, @{message.from_user.username}!\nДанный бот предназаначен для создания ссылок оплаты\nДля его работы "
+                     f"необходимо 2 параметра: \n1. <b>Номер договора</b>\n2. <b>Сумма платежа</b>. \n\n<i>Для "
+                     f"получения ссылки нажмите на кнопку ниже!</i>",
+                     parse_mode="HTML", reply_markup=ReplyKeyboardMarkup(resize_keyboard=True).add(*buttons))
 
 @bot.callback_query_handler(func=lambda call: True)
 def callback_inline(call):
     if call.data == 'yes':
         bot.send_message(call.from_user.id,
-                         f"Отлично!\n\n<i>{create_link(str(kvatance['id']), int(kvatance['price']) * 100)}</i>",
+                         f"Отлично!\n\n<i>{create_link(str(kvatance['id']), float(kvatance['price']) * 100)}</i>",
                          parse_mode="HTML", reply_markup=ReplyKeyboardMarkup(resize_keyboard=True).add("Оплатить"))
         return
     elif call.data == 'no':
@@ -138,14 +129,7 @@ def first(message):
 def message_handler(message):
     userid = message.from_user.id
     user = message.from_user.username
-    if message.text == "/start":
-        buttons = ["Оплатить", "Номер документа"]
-        bot.send_message(userid,
-                         f"Привет, @{user}!\nДанный бот предназаначен для создания ссылок оплаты\nДля его работы "
-                         f"необходимо 2 параметра: \n1. <b>Номер договора</b>\n2. <b>Сумма платежа</b>. \n\n<i>Для "
-                         f"получения ссылки нажмите на кнопку ниже!</i>",
-                         parse_mode="HTML", reply_markup=ReplyKeyboardMarkup(resize_keyboard=True).add(*buttons))
-    elif message.text == "Оплатить":
+    if message.text == "Оплатить":
         bot.send_message(userid, "Введите номер договора: ")
         bot.register_next_step_handler_by_chat_id(message.chat.id, first)
     else:

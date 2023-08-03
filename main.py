@@ -46,7 +46,6 @@ def docnum(message):
 
 # ##########################################------------------------
 
-
 def create_link(number, summ):
     parameters = dict(ExtID=number, Amount=summ, Description="test from bot",
                       ClientInfo={

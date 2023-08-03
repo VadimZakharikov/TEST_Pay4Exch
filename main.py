@@ -89,7 +89,7 @@ def end(message, kvatance):
     if message.text == "Да":
         buttons = ["Оплатить"]
         bot.send_message(message.from_user.id,
-                         f"Отлично!\n\n<i>{create_link(str(kvatance['id']), int(kvatance['price']) * 100)}</i>",
+                         f"Отлично!\n\n<i>{create_link(str(kvatance['id']), float(kvatance['price']) * 100)}</i>",
                          parse_mode="HTML", reply_markup=ReplyKeyboardMarkup(resize_keyboard=True).add(*buttons))
     else:
         buttons = ["Оплатить"]

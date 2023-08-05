@@ -23,6 +23,9 @@ logger.setLevel(logging.DEBUG)
 db_connection = psycopg2.connect(DB_URI, sslmode="require")
 db_oject = db_connection.cursor()
 
+# ##########################################------------------------
+#= КОМАНДА "СТАРТ" =
+
 @bot.message_handler(commands=["start"])
 def start(message):
     id = message.from_user.id
@@ -40,6 +43,7 @@ def start(message):
         bot.send_message(id, f"Identification is not required.\nYou have already been identified.")
 
 # ##########################################------------------------
+#= НОМЕР ДОКУМЕНТА =
 
 @bot.message_handler(commands=["docnum"])
 def docnum(message):
@@ -48,7 +52,7 @@ def docnum(message):
     bot.reply_to(message, ("Номер документа: " + str(doc_id)))
 
 # ##########################################------------------------
-# ##########################################------------------------
+#= ЗАЯВКА В ПЛАТЁЖНЫЙ ШЛЮЗ =
 
 def create_link(number, summ):
     parameters = dict(ExtID=number, Amount=summ, Description="test from bot",
@@ -145,8 +149,12 @@ def message_handler(message):
         bot.send_message(userid, "Введите номер заявки: ")
         bot.register_next_step_handler_by_chat_id(message.chat.id, first)
     else:
-        bot.send_message(userid, "Не верная команда, введдите ещё раз:")
-#================================================================================================
+        bot.send_message(userid, "Нет такой команды, введдите ещё раз:")
+
+# ##########################################------------------------
+# ##########################################------------------------
+#= ОКНО ДЛЯ КОДА =
+
 
 
 

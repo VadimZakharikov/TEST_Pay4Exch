@@ -48,6 +48,8 @@ def docnum(message):
     bot.reply_to(message, ("Номер документа: " + str(doc_id)))
 
 # ##########################################------------------------
+# ##########################################------------------------
+
 def create_link(number, summ):
     parameters = dict(ExtID=number, Amount=summ, Description="test from bot",
                       ClientInfo={
@@ -114,7 +116,7 @@ def second(message, dogovor):
     summa = str.replace(summa, ",", ".")
     for smb in voc:
         if smb in summa.lower():
-            bot.send_message(message.from_user.id, "Неверная сумма, введите ещё раз.")
+            bot.send_message(message.from_user.id, "Неверная сумма, введите ещё раз:")
             bot.register_next_step_handler_by_chat_id(message.chat.id, second, dogovor)
             return
     global kvatance
@@ -140,11 +142,17 @@ def first(message):
 def message_handler(message):
     userid = message.from_user.id
     if message.text == "Оплатить":
-        bot.send_message(userid, "Введите номер договора: ")
+        bot.send_message(userid, "Введите номер заявки: ")
         bot.register_next_step_handler_by_chat_id(message.chat.id, first)
     else:
-        bot.send_message(userid, "Простите, но я не знаю такую команду :<")
+        bot.send_message(userid, "Не верная команда, введдите ещё раз:")
 #================================================================================================
+
+
+
+
+
+
 #@bot.message_handler(commands=["pay"])
 #def pay(message):
 #    bot.send_message(message.chat.id, 'Укажите номер заявки:')
@@ -327,6 +335,7 @@ def message_handler(message):
 
 
 
+# ##########################################------------------------
 # ##########################################------------------------
 
 @server.route(f"/{BOT_TOKEN}", methods=["POST"])

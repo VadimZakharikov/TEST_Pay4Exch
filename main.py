@@ -11,7 +11,7 @@ from flask import Flask, request
 from datetime import datetime
 
 from telebot import types
-from telebot.types import ReplyKeyboardMarkup
+from telebot.types import ReplyKeyboardMarkup, InlineKeyboardMarkup, InlineKeyboardButton
 import requests
 import json
 

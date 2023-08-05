@@ -69,11 +69,11 @@ def create_link(number, summ):
         }], AdditionalParameters={
             "DogovorID": "12345_test"
         })
-    signature = hmac.new(API_KEY.encode(), json.dumps(parameters, ensure_ascii=False).encode('utf-8'),
+    signature = hmac.new(config.API_KEY.encode(), json.dumps(parameters, ensure_ascii=False).encode('utf-8'),
                          digestmod=hashlib.sha1).digest()
     signature_base64 = base64.b64encode(signature).decode()
     headers = {
-        'TCB-Header-Login': LOGIN,
+        'TCB-Header-Login': config.LOGIN,
         'TCB-Header-Sign': signature_base64,
         "Content-Type": "application/json; charset=utf-8"
     }
@@ -91,6 +91,14 @@ def create_link(number, summ):
 def pay(message):
     bot.send_message(message.chat.id, 'Укажите номер заявки:')
     bot.register_next_step_handler(message, first)
+@bot.message_handler(commands=["start"])
+def start(message):
+    buttons = ["Оплатить"]
+    bot.send_message(message.from_user.id,
+                     f"Привет, @{message.from_user.username}!\nДанный бот предназаначен для создания ссылок оплаты\nДля его работы "
+                     f"необходимо 2 параметра: \n1. <b>Номер договора</b>\n2. <b>Сумма платежа</b>. \n\n<i>Для "
+                     f"получения ссылки нажмите на кнопку ниже!</i>",
+                     parse_mode="HTML", reply_markup=ReplyKeyboardMarkup(resize_keyboard=True).add(*buttons))
 
 @bot.callback_query_handler(func=lambda call: True)
 def callback_inline(call):

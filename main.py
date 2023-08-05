@@ -63,11 +63,11 @@ def create_link(number, summ):
         }], AdditionalParameters={
             "DogovorID": "12345_test"
         })
-    signature = hmac.new(config.API_KEY.encode(), json.dumps(parameters, ensure_ascii=False).encode('utf-8'),
+    signature = hmac.new(API_KEY.encode(), json.dumps(parameters, ensure_ascii=False).encode('utf-8'),
                          digestmod=hashlib.sha1).digest()
     signature_base64 = base64.b64encode(signature).decode()
     headers = {
-        'TCB-Header-Login': config.LOGIN,
+        'TCB-Header-Login': LOGIN,
         'TCB-Header-Sign': signature_base64,
         "Content-Type": "application/json; charset=utf-8"
     }

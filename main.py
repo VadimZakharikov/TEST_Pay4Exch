@@ -61,7 +61,7 @@ def docnum(message):
 #= ЗАЯВКА В ПЛАТЁЖНЫЙ ШЛЮЗ =
 
 def create_link(number, summ):
-    parameters = dict(ExtID=number, Amount=summ, Description=number, #"test from bot",
+    parameters = dict(ExtID="ID88618_176418_test8", Amount=summ, Description=number, #"test from bot",
                       ClientInfo={
                           "Email": "test@test.com",
                           "PhoneNumber": "+7 (911) 123-00-00"

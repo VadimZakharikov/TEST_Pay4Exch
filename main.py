@@ -55,7 +55,7 @@ def docnum(message):
 #= ЗАЯВКА В ПЛАТЁЖНЫЙ ШЛЮЗ =
 
 def create_link(number, summ):
-    parameters = dict(Amount=summ, Description=number,#ExtID=number, Amount=summ, Description=number, #"test from bot",
+    parameters = dict(ExtID=number, Amount=summ, Description=number, #"test from bot",
                       ClientInfo={
                           "Email": "test@test.com",
                           "PhoneNumber": "+7 (911) 123-00-00"
@@ -105,7 +105,7 @@ def callback_inline(call):
     bot.clear_step_handler_by_chat_id(chat_id=call.message.chat.id)
     if call.data == 'yes':
         bot.send_message(call.from_user.id,
-                         f"Отлично!\n\n<i>{create_link(str(kvatance['id']), float(kvatance['price']) * 100)}</i>",
+                         f"<i>{create_link(str(kvatance['id']), float(kvatance['price']) * 100)}</i>",
                          parse_mode="HTML", reply_markup=ReplyKeyboardMarkup(resize_keyboard=True).add("Оплатить"))
 
         return
@@ -131,7 +131,7 @@ def second(message, dogovor):
         summa = round(summa, 2)
         kvatance = {"id": dogovor, "price": summa}
         bot.send_message(message.from_user.id,
-                         f"Квитанция: <i>{dogovor}</i>\nСумма: <i>{summa:.2f} руб.</i>\n\n<b>Все верно?</b>",
+                         f"Номер заявки: <i>{dogovor}</i>\nСумма: <i>{summa:.2f} руб.</i>\n\n<b>Все верно?</b>",
                          parse_mode="HTML", reply_markup=InlineKeyboardMarkup().add(btn1, btn2)),
     except ValueError:
         bot.send_message(message.from_user.id, "Неверный формат! Попробуйте еще раз.")

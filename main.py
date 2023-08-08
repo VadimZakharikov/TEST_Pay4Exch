@@ -38,24 +38,18 @@ def start(message):
     if not result:
         db_oject.execute("INSERT INTO users(id, username, usercontact) VALUES (%s, %s, %s)", (id, username, ''))
         db_connection.commit()
-        bot.send_message(id, f"You are identified.\nAll is ready.")
+        buttons = ["Оплатить", "Статус"]
+        bot.send_message(id, f"You are identified.\nAll is ready.", reply_markup=ReplyKeyboardMarkup(resize_keyboard=True).add(*buttons))
     else:
-        bot.send_message(id, f"Identification is not required.\nYou have already been identified.")
-    buttons = ["Оплатить", "Статус"]
-    bot.send_message(message.from_user.id,
-                     f"Привет, @{message.from_user.username}!\nДанный бот предназаначен для создания ссылок оплаты\nДля его работы "
-                     f"необходимо 2 параметра: \n1. <b>Номер договора</b>\n2. <b>Сумма платежа</b>. \n\n<i>Для "
-                     f"получения ссылки нажмите на кнопку ниже!</i>",
-                     parse_mode="HTML", reply_markup=ReplyKeyboardMarkup(resize_keyboard=True).add(*buttons))
+        buttons = ["Оплатить", "Статус"]
+        bot.send_message(id, f"Identification is not required.\nYou have already been identified.", reply_markup=ReplyKeyboardMarkup(resize_keyboard=True).add(*buttons))
 
 # ##########################################------------------------
 #= НОМЕР ДОКУМЕНТА =
 
 @bot.message_handler(commands=["docnum"])
-def docnum(message):
-
-    doc_id = datetime.utcnow()
-    bot.reply_to(message, ("Номер документа: " + str(doc_id)))
+def docnum():
+    return str(datetime.utcnow()).replace("-", "").replace(":","").replace(" ", "").replace(".", "")
 
 # ##########################################------------------------
 #= ПРВОЕРКА СТАТУСА ЗАЯВКИ =
@@ -65,11 +59,11 @@ def status(user_id, message):
     for user in users:
         if user[2] != None and user[0] == user_id:
             parameters = dict(ExtID=user[2])
-            signature = hmac.new(config.API_KEY.encode(), json.dumps(parameters, ensure_ascii=False).encode('utf-8'),
+            signature = hmac.new(API_KEY.encode(), json.dumps(parameters, ensure_ascii=False).encode('utf-8'),
                                  digestmod=hashlib.sha1).digest()
             signature_base64 = base64.b64encode(signature).decode()
             headers = {
-                'TCB-Header-Login': config.LOGIN,
+                'TCB-Header-Login': LOGIN,
                 'TCB-Header-Sign': signature_base64,
                 "Content-Type": "application/json; charset=utf-8"
             }
@@ -87,11 +81,12 @@ def status(user_id, message):
     bot.send_message(user_id, "У вас нет активных заявок.")
 
 #= ЗАЯВКА В ПЛАТЁЖНЫЙ ШЛЮЗ =
-def create_link(number, summ):
-    parameters = dict(ExtID=number, 
-                      Amount=summ, 
-                      Description=number, #"test from bot",
-                      TTL="4.00:00:00")
+def create_link(number, summ, desc):
+    parameters = dict(ExtID=number,
+                      Amount=summ,
+                      Description=desc,
+                      TTl="4.00:00:00",
+                      OrderId=number)
     signature = hmac.new(API_KEY.encode(), json.dumps(parameters, ensure_ascii=False).encode('utf-8'),
                          digestmod=hashlib.sha1).digest()
     signature_base64 = base64.b64encode(signature).decode()
@@ -105,9 +100,9 @@ def create_link(number, summ):
                                     data=json.dumps(parameters, ensure_ascii=False).encode('utf-8'),
                                     headers=headers)
         response = responseJSON.json()
+        print(kvatance)
         db_oject.execute(f"UPDATE users SET order_id = {kvatance['docnum']} WHERE id = {kvatance['user_id']}")
         db_connection.commit()
-        print(response)
         return f"Ссылка: {response['FormURL']}"
     except TimeoutError:
         return f"Ошибка: timeout error"
@@ -123,7 +118,7 @@ def callback_inline(call):
     bot.clear_step_handler_by_chat_id(chat_id=call.message.chat.id)
     if call.data == 'yes':
         bot.send_message(call.from_user.id,
-                         f"<i>{create_link(str(kvatance['id']), float(kvatance['price']) * 100)}</i>",
+                         f"Отлично!\n\n<i>{create_link(kvatance['docnum'], float(kvatance['price']) * 100, kvatance['id'])}</i>",
                          parse_mode="HTML", reply_markup=ReplyKeyboardMarkup(resize_keyboard=True).add("Оплатить", "Статус"))
 
         return
@@ -147,7 +142,7 @@ def second(message, dogovor):
         btn1 = InlineKeyboardButton("Ок", callback_data="yes")
         btn2 = InlineKeyboardButton("Отмена", callback_data="no")
         summa = round(summa, 2)
-        kvatance = {"id": dogovor, "price": summa}
+        kvatance = {"id": dogovor, "price": summa, 'user_id': message.from_user.id, "docnum": docnum()}
         bot.send_message(message.from_user.id,
                          f"Номер заявки: <i>{dogovor}</i>\nСумма: <i>{summa:.2f} руб.</i>\n\n<b>Все верно?</b>",
                          parse_mode="HTML", reply_markup=InlineKeyboardMarkup().add(btn1, btn2)),

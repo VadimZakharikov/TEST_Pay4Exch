@@ -41,12 +41,12 @@ def start(message):
         bot.send_message(id, f"You are identified.\nAll is ready.")
     else:
         bot.send_message(id, f"Identification is not required.\nYou have already been identified.")
-    buttons = ["Оплатить"]
-    bot.send_message(message.from_user.id,
-                     f"Привет, @{message.from_user.username}!\nДанный бот предназаначен для создания ссылок оплаты\nДля его работы "
-                     f"необходимо 2 параметра: \n1. <b>Номер договора</b>\n2. <b>Сумма платежа</b>. \n\n<i>Для "
-                     f"получения ссылки нажмите на кнопку ниже!</i>",
-                     parse_mode="HTML", reply_markup=ReplyKeyboardMarkup(resize_keyboard=True).add(*buttons))
+#    buttons = ["Оплатить"]
+#    bot.send_message(message.from_user.id,
+#                     f"Привет, @{message.from_user.username}!\nДанный бот предназаначен для создания ссылок оплаты\nДля его работы "
+#                     f"необходимо 2 параметра: \n1. <b>Номер договора</b>\n2. <b>Сумма платежа</b>. \n\n<i>Для "
+#                     f"получения ссылки нажмите на кнопку ниже!</i>",
+#                     parse_mode="HTML", reply_markup=ReplyKeyboardMarkup(resize_keyboard=True).add(*buttons))
 
 # ##########################################------------------------
 #= НОМЕР ДОКУМЕНТА =

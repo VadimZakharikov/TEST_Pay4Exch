@@ -47,7 +47,7 @@ def start(message):
 # ##########################################------------------------
 #= НОМЕР ДОКУМЕНТА =
 
-@bot.message_handler(commands=["docnum"])
+#@bot.message_handler(commands=["docnum"])
 def docnum():
     return str(datetime.utcnow()).replace("-", "").replace(":","").replace(" ", "").replace(".", "")
 

@@ -343,11 +343,6 @@ def redirect_message():
     bot.process_new_updates([update])
     return "!", 200
 
-@server.route('/process_data', methods=['GET', 'POST'])
-def process_data():
-    data = request.args
-    print("\n\\Переданные данные:", data)
-    return "Успех!"
 
 if __name__ == "__main__":
     bot.remove_webhook()

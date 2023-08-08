@@ -41,7 +41,7 @@ def start(message):
         bot.send_message(id, f"You are identified.\nAll is ready.")
     else:
         bot.send_message(id, f"Identification is not required.\nYou have already been identified.")
-    buttons = ["Оплатить"]
+    buttons = ["Оплатить", "Статус"]
     bot.send_message(message.from_user.id,
                      f"Привет, @{message.from_user.username}!\nДанный бот предназаначен для создания ссылок оплаты\nДля его работы "
                      f"необходимо 2 параметра: \n1. <b>Номер договора</b>\n2. <b>Сумма платежа</b>. \n\n<i>Для "
@@ -58,8 +58,35 @@ def docnum(message):
     bot.reply_to(message, ("Номер документа: " + str(doc_id)))
 
 # ##########################################------------------------
-#= ЗАЯВКА В ПЛАТЁЖНЫЙ ШЛЮЗ =
+#= ПРВОЕРКА СТАТУСА ЗАЯВКИ =
+def status(user_id, message):
+    db_oject.execute(f"SELECT * FROM users")
+    users = db_oject.fetchall()
+    for user in users:
+        if user[2] != None and user[0] == user_id:
+            parameters = dict(ExtID=user[2])
+            signature = hmac.new(config.API_KEY.encode(), json.dumps(parameters, ensure_ascii=False).encode('utf-8'),
+                                 digestmod=hashlib.sha1).digest()
+            signature_base64 = base64.b64encode(signature).decode()
+            headers = {
+                'TCB-Header-Login': config.LOGIN,
+                'TCB-Header-Sign': signature_base64,
+                "Content-Type": "application/json; charset=utf-8"
+            }
+            responseJSON = requests.get("https://paytest.online.tkbbank.ru/api/v1/order/state",
+                                        data=json.dumps(parameters, ensure_ascii=False).encode('utf-8'),
+                                        headers=headers)
+            response = responseJSON.json()
+            pay_status = response['OrderInfo']['StateDescription']
+            if pay_status == "Успешно":
+                print("DELETE")
+                db_oject.execute(f"UPDATE users SET order_id = NULL WHERE id = {user_id}")
+                db_connection.commit()
+            bot.send_message(user_id, f"Статус оплаты: {pay_status}")
+            return
+    bot.send_message(user_id, "У вас нет активных заявок.")
 
+#= ЗАЯВКА В ПЛАТЁЖНЫЙ ШЛЮЗ =
 def create_link(number, summ):
     parameters = dict(ExtID=number, 
                       Amount=summ, 
@@ -95,11 +122,11 @@ def callback_inline(call):
     if call.data == 'yes':
         bot.send_message(call.from_user.id,
                          f"<i>{create_link(str(kvatance['id']), float(kvatance['price']) * 100)}</i>",
-                         parse_mode="HTML", reply_markup=ReplyKeyboardMarkup(resize_keyboard=True).add("Оплатить"))
+                         parse_mode="HTML", reply_markup=ReplyKeyboardMarkup(resize_keyboard=True).add("Оплатить", "Статус"))
 
         return
     elif call.data == 'no':
-        buttons = ["Оплатить"]
+        buttons = ["Оплатить", "Статус"]
         bot.send_message(call.from_user.id, "Оплата отменена!",
                          reply_markup=ReplyKeyboardMarkup(resize_keyboard=True).add(*buttons))
         return
@@ -137,6 +164,8 @@ def message_handler(message):
     if message.text == "Оплатить":
         bot.send_message(userid, "Введите номер заявки: ")
         bot.register_next_step_handler_by_chat_id(message.chat.id, first)
+    elif message.text == "Статус":
+        status(userid, message)
     else:
         bot.send_message(userid, "Нет такой команды, введдите ещё раз:")
 

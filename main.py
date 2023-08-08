@@ -71,8 +71,7 @@ def create_link(number, summ):
     headers = {
         'TCB-Header-Login': LOGIN,
         'TCB-Header-Sign': signature_base64,
-        "Content-Type": "application/json; charset=utf-8",
-        'URL': "https://172.16.78.90:8885/process_data"
+        "Content-Type": "application/json; charset=utf-8"
     }
     try:
         responseJSON = requests.get("https://paytest.online.tkbbank.ru/api/v1/card/unregistered/debit",

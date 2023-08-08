@@ -113,7 +113,7 @@ def create_link(number, summ, desc):
 
 @bot.message_handler(commands=["pay"])
 def pay(message):
-    bot.send_message(message.chat.id, 'Введите номер платежа:')
+    bot.send_message(message.chat.id, 'Введите номер заявки:')
     bot.register_next_step_handler(message, first)
 
 @bot.callback_query_handler(func=lambda call: True)
@@ -147,15 +147,15 @@ def second(message, dogovor):
         summa = round(summa, 2)
         kvatance = {"id": dogovor, "price": summa, 'user_id': message.from_user.id, "docnum": doc_nmbr()}
         bot.send_message(message.from_user.id,
-                         f"Квитанция: <i>{dogovor}</i>\nСумма: <i>{summa:.2f} руб.</i>\n\n<b>Все верно?</b>",
+                         f"Заявка: <i>{dogovor}</i>\nСумма: <i>{summa:.2f} руб.</i>\n\n<b>Верно?</b>",
                          parse_mode="HTML", reply_markup=InlineKeyboardMarkup().add(btn1, btn2)),
     except ValueError:
-        bot.send_message(message.from_user.id, "Неверный формат! Попробуйте еще раз.")
+        bot.send_message(message.from_user.id, "Ошибка в сумме, попробуйте еще раз:")
         bot.register_next_step_handler_by_chat_id(message.chat.id, second, dogovor)
 
 def first(message):
     dogovor = message.text
-    bot.send_message(message.from_user.id, "Отлично, теперь введите сумму платежа:")
+    bot.send_message(message.from_user.id, "Введите сумму платежа:")
     bot.register_next_step_handler_by_chat_id(message.chat.id, second, dogovor)
 def check(user_id: int):
     db_oject.execute(f"SELECT {user_id} FROM users")
@@ -170,191 +170,11 @@ def message_handler(message):
     elif message.text == "Статус":
         status(userid, message)
     else:
-        bot.send_message(userid, "Простите, но я не знаю такую команду :<")
+        bot.send_message(userid, "Нет такой команды, введите команду:")
 
 # ##########################################------------------------
 # ##########################################------------------------
 #= ОКНО ДЛЯ КОДА =
-
-
-
-
-
-
-
-#@bot.message_handler(commands=["pay"])
-#def pay(message):
-#    bot.send_message(message.chat.id, 'Укажите номер заявки:')
-#    bot.register_next_step_handler(message, get_number)
-#
-#def get_number(message):
-#    number = message.text
-#    bot.send_message(message.chat.id, 'Укажите сумму:')
-#    bot.register_next_step_handler(message, get_summ, number)
-#
-#def get_summ(message, number):
-#    try:
-#        summ = float(message.text)
-#        amount = int(summ * 100)
-#        keyboard = types.InlineKeyboardMarkup()
-#        keyboard.add(
-#            types.InlineKeyboardButton(text='Да', callback_data='Да'),
-#            types.InlineKeyboardButton(text='Нет', callback_data='Нет')
-#        )
-#        bot.send_message(message.chat.id, f'Подтверждаете платеж на сумму {summ} руб.?', reply_markup=keyboard)
-#        bot.register_next_step_handler(message, confirm_payment, number, amount)
-#    except ValueError:
-#        bot.send_message(message.chat.id, 'Неверный формат суммы. Попробуйте еще раз.')
-#       bot.register_next_step_handler(message, get_number)
-#
-#def confirm_payment(message, number, amount):
-#    if message.text == 'Да':
-#        bot.send_message(message.chat.id, 'Отлично!\\nСсылка на оплату:')
-#        bot.send_message(message.chat.id, f'<https://my-super-payment-gateway.com/pay?number={number}&amount={amount}>')
-#    else:
-#        bot.send_message(message.chat.id, 'Оплата отменена.')
-
-
-
-
-
-
-
-
-
-# # @bot.message_handler(commands=["pay"]) # Формирование онлайн оплаты
-# def pay(message):
-# #    doc_id = datetime.utcnow()
-# #    id = message.from_user.id
-#    # bot.register_next_step_handler(bot.send_message(message.chat.id, 'Укажите номер заявкиTest2:'), NUMBER = message.text)
-#    # @bot.message_handler(content_types='text')
-    
-#        # if message.text:
-#     bot.send_message(message.chat.id,"Укажите номер заявкиTest2:")
-#     @bot.message_handler(content_types='text')
-#     def message_reply(message):
-#         if message.text:
-#             bot.send_message(message.chat.id,"WORK")
-#             NUMBER = str(message.text)
-#             bot.send_message(message.chat.id, NUMBER)
-#            # @bot.message_handler(content_types='text')
-#             bot.send_message(message.chat.id, 'Укажите сумму для оплаты заявки ' + NUMBER)
-#             bot.register_next_step_handler(message, sum)
-#     def sum(message):
-#         if message.text:
-#             SUMM = str(message.text)
-#             bot.send_message(message.chat.id, SUMM)
-#             bot.send_message(message.chat.id, 'Сформировать ссылку для онлайн оплаты заявки' + NUMBER + 'на сумму' + SUMM)
-#            # bot.register_next_step_handler(message, button)
-#    # @bot.message_handler(commands=['button'])
-
-#     def button(message):
-#         #@bot.message_handler(commands=['button'])
-#         keyboard = types.InlineKeyboardMarkup()
-#         keyboard.add(
-#             types.InlineKeyboardButton(text='Да', callback_data='Да'),
-#             types.InlineKeyboardButton(text='Нет', callback_data='Нет')
-#             )
-#         bot.send_Message(message.chat.id, 'Сформировать ссылку для онлайн оплаты заявки' + NUMBER + 'на сумму' + SUMM)
-#         #@bot.message_handler(commands=['button'])
-       
-#         bot.register_next_step_handler(
-#             bot.send_Message(message.chat.id, 'Сформировать ссылку для онлайн оплаты заявки' + NUMBER + 'на сумму' + SUMM, reply_markup=keyboard)
-#             )
-#         if message.text == 'Да':
-# #        Генерируем ссылку TKB-Pay
-#             #response = create_link(str(NUMBER), str(SUMM));
-#             bot.send_message(message.chat.id, f"Ссылка для оплаты картой:\n" + response[FormUrl])
-#         elif message.text == 'Нет':
-#             bot.send_message(message.chat.id, 'Отмена.')
-#         else:
-#             bot.send_message(message.chat.id, 'Необходимо выбрать.')
-
-# # ##########################################-
-
-# def create_link(number, summ):
-#     parameters = {
-#         "ExtID":number,
-#         "Amount":summ,
-#  #   "Description":"test from bot",
-# #  //"ReturnURL":"http://site.ru_result",
-# #  //"ClientInfo": {
-# #    //             "Email":"test@test.com",
-# #      //           "PhoneNumber": "+7 (911) 123-00-00"
-# #        //        },
-# #  //"TTL":"4.00:00:00",
-# #  //"CartPositions":[{
-# #    //               "Quantity":1.0,
-# #      //             "Price":300000,
-# #        //           "Tax":60,
-# #          //         "Text":"Оплата по договору 123_test Иванова И.И.",
-# #           //        "PaymentMethodType":4,
-# #            //       "PaymentSubjectType":4
-# #              //     }],
-# # // "AdditionalParameters":{
-# #   //                      "DogovorID":"12345_test"
-# #     //                    }
-
-        
-#     }
-#     headers = {'Authorization': 'k6WRcPWcVCpuLPDJoJ7hYLDtsqZF6nMnD8UxKcqNCVyfkNJ1AYdbk35KCDyWZreJZc0L4g7mtvPcmxhPQ7eijKcJdj3gOCXkQZpiV66uZ1SZp2yevTf0n5zq8sHUm0GZGDvvh82SaTsr1nujVYV3w57UA8iDznh7u2sUGc5vZw0COhxW6x7wfNCLEL3iZztXMt583JMS2zeaeFfsMvFboU2RzQp5hXEzddZvmy1yUqDQHCF8FLFE3rK1zoJotQLe'}
-#     responseJSON = requests.get("https://paytest.online.tkbbank.ru/api/v1/card/unregistered/debit", params = parameters, headers = headers)
-#     response = json.load(responseJSON)
-    
-
-#     return response
-    
-# # Ждём номер заявки и записываем в number
-# # Ждём сумму заявки и записываем в summ
-# # Кнопки подтверждения и отмемы
-# # При отмене повтор, при подтверждении генерим ссылку
-
-#     #bot.send_message(message.chat.id,"text")
-      
-    
-#    # bot.register_next_step_handler(bot.send_message(message.chat.id, 'Укажите номер заявкиTest:'), NUMBER = message.text)
-#   #  msg = bot.reply_to(message, 'Укажите номер заявкиTest:')
-#    # bot.register_next_step_handler(msg, NUMBER = message.text)
-    
-#  #   bot.send_message(message.chat.id, "test")
-#     #bot.send_message(message.chat.id, NUMBER)
-#    # bot.register_next_step_handler(bot.send_message(message.chat.id, 'Укажите сумму для оплаты заявки: {NUMBER}'),  SUMM = message.text)
-# #    bot.send_message(id, f"Ссылка для оплаты картой:\nHttps://www.google.com")
-
-
-
-
-
-# # /api/v1/card/unregistered/debit
-
-# # {
-# #  "ExtID":number,
-# #  "Amount":summ,
-# #  "Description":"test from bot",
-# #  //"ReturnURL":"http://site.ru_result",
-# #  //"ClientInfo": {
-# #    //             "Email":"test@test.com",
-# #      //           "PhoneNumber": "+7 (911) 123-00-00"
-# #        //        },
-# #  //"TTL":"4.00:00:00",
-# #  //"CartPositions":[{
-# #    //               "Quantity":1.0,
-# #      //             "Price":300000,
-# #        //           "Tax":60,
-# #          //         "Text":"Оплата по договору 123_test Иванова И.И.",
-# #           //        "PaymentMethodType":4,
-# #            //       "PaymentSubjectType":4
-# #              //     }],
-# # // "AdditionalParameters":{
-# #   //                      "DogovorID":"12345_test"
-# #     //                    }
-# # //}
-
-
-
-
-
-
 
 
 

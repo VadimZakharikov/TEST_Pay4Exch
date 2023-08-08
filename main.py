@@ -78,6 +78,7 @@ def create_link(number, summ):
                                     data=json.dumps(parameters, ensure_ascii=False).encode('utf-8'),
                                     headers=headers)
         response = responseJSON.json()
+        print(response)
         return f"Ссылка: {response['FormURL']}"
     except TimeoutError:
         return f"Ошибка: timeout error"

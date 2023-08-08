@@ -64,7 +64,7 @@ def create_link(number, summ):
     parameters = dict(ExtID=number, 
                       Amount=summ, 
                       Description=number, #"test from bot",
-                      TTL="4.00:00:00"
+                      TTL="4.00:00:00")
     signature = hmac.new(API_KEY.encode(), json.dumps(parameters, ensure_ascii=False).encode('utf-8'),
                          digestmod=hashlib.sha1).digest()
     signature_base64 = base64.b64encode(signature).decode()

@@ -47,10 +47,13 @@ def start(message):
 # ##########################################------------------------
 #= НОМЕР ДОКУМЕНТА =
 
-#@bot.message_handler(commands=["docnum"])
-def docnum():
-    return str(datetime.utcnow()).replace("-", "").replace(":","").replace(" ", "").replace(".", "")
-
+@bot.message_handler(commands=["docnum"])
+def docnum(message):
+    doc_number = str(datetime.utcnow()).replace("-", "").replace(":","").replace(" ", "").replace(".", "")
+    bot.send_message(message.from_user.id, "Номер документа: {doc_number}")
+    return doc_number
+def doc_nmbr():
+    return  str(datetime.utcnow()).replace("-", "").replace(":","").replace(" ", "").replace(".", "")
 # ##########################################------------------------
 #= ПРВОЕРКА СТАТУСА ЗАЯВКИ =
 def status(user_id, message):
@@ -143,7 +146,7 @@ def second(message, dogovor):
         btn1 = InlineKeyboardButton("Ок", callback_data="yes")
         btn2 = InlineKeyboardButton("Отмена", callback_data="no")
         summa = round(summa, 2)
-        kvatance = {"id": dogovor, "price": summa, 'user_id': message.from_user.id, "docnum": docnum()}
+        kvatance = {"id": dogovor, "price": summa, 'user_id': message.from_user.id, "docnum": doc_nmbr()}
         bot.send_message(message.from_user.id,
                          f"Квитанция: <i>{dogovor}</i>\nСумма: <i>{summa:.2f} руб.</i>\n\n<b>Все верно?</b>",
                          parse_mode="HTML", reply_markup=InlineKeyboardMarkup().add(btn1, btn2)),

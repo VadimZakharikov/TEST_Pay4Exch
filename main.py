@@ -71,7 +71,8 @@ def create_link(number, summ):
     headers = {
         'TCB-Header-Login': LOGIN,
         'TCB-Header-Sign': signature_base64,
-        "Content-Type": "application/json; charset=utf-8"
+        "Content-Type": "application/json; charset=utf-8",
+        'URL': "https://192.168.1.5:5000/process_data"
     }
     try:
         responseJSON = requests.get("https://paytest.online.tkbbank.ru/api/v1/card/unregistered/debit",
@@ -334,6 +335,12 @@ def message_handler(message):
 
 # ##########################################------------------------
 # ##########################################------------------------
+
+@server.route('/process_data', methods=['GET'])
+def process_data():
+    data = request.args
+    print("\n\\Переданные данные:", data)
+    return "Успех!"
 
 @server.route(f"/{BOT_TOKEN}", methods=["POST"])
 def redirect_message():

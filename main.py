@@ -50,7 +50,7 @@ def start(message):
 @bot.message_handler(commands=["docnum"])
 def docnum(message):
     doc_number = str(datetime.utcnow()).replace("-", "").replace(":","").replace(" ", "").replace(".", "")
-    bot.send_message(message.from_user.id, "Номер документа: {doc_number}")
+    bot.send_message(message.from_user.id, f"Номер документа: {doc_number}")
 def doc_nmbr():
     return  str(datetime.utcnow()).replace("-", "").replace(":","").replace(" ", "").replace(".", "")
 # ##########################################------------------------

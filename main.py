@@ -121,7 +121,7 @@ def callback_inline(call):
     bot.clear_step_handler_by_chat_id(chat_id=call.message.chat.id)
     if call.data == 'yes':
         bot.send_message(call.from_user.id,
-                         f"Отлично!\n\n<i>{create_link(kvatance['docnum'], float(kvatance['price']) * 100, kvatance['id'])}</i>",
+                         f"<i>{create_link(kvatance['docnum'], float(kvatance['price']) * 100, kvatance['id'])}</i>",
                          parse_mode="HTML", reply_markup=ReplyKeyboardMarkup(resize_keyboard=True).add("Оплатить", "Статус"))
 
         return

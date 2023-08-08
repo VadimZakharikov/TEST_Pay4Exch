@@ -96,11 +96,12 @@ def create_link(number, summ, desc):
         "Content-Type": "application/json; charset=utf-8"
     }
     try:
-        responseJSON = requests.get("https://paytest.online.tkbbank.ru/api/v1/card/unregistered/debit",
+        responseJSON = requests.get(PAY_URL,
                                     data=json.dumps(parameters, ensure_ascii=False).encode('utf-8'),
                                     headers=headers)
         response = responseJSON.json()
         print(kvatance)
+        print(response)
         db_oject.execute(f"UPDATE users SET order_id = {kvatance['docnum']} WHERE id = {kvatance['user_id']}")
         db_connection.commit()
         return f"Ссылка: {response['FormURL']}"
@@ -110,7 +111,7 @@ def create_link(number, summ, desc):
 
 @bot.message_handler(commands=["pay"])
 def pay(message):
-    bot.send_message(message.chat.id, 'Укажите номер заявки:')
+    bot.send_message(message.chat.id, 'Введите номер платежа:')
     bot.register_next_step_handler(message, first)
 
 @bot.callback_query_handler(func=lambda call: True)
@@ -133,7 +134,7 @@ def second(message, dogovor):
     summa = str.replace(summa, ",", ".")
     for smb in voc:
         if smb in summa.lower():
-            bot.send_message(message.from_user.id, "Неверная сумма, введите ещё раз:")
+            bot.send_message(message.from_user.id, "Неверная сумма, введите ещё раз.")
             bot.register_next_step_handler_by_chat_id(message.chat.id, second, dogovor)
             return
     global kvatance
@@ -144,27 +145,30 @@ def second(message, dogovor):
         summa = round(summa, 2)
         kvatance = {"id": dogovor, "price": summa, 'user_id': message.from_user.id, "docnum": docnum()}
         bot.send_message(message.from_user.id,
-                         f"Номер заявки: <i>{dogovor}</i>\nСумма: <i>{summa:.2f} руб.</i>\n\n<b>Все верно?</b>",
+                         f"Квитанция: <i>{dogovor}</i>\nСумма: <i>{summa:.2f} руб.</i>\n\n<b>Все верно?</b>",
                          parse_mode="HTML", reply_markup=InlineKeyboardMarkup().add(btn1, btn2)),
     except ValueError:
         bot.send_message(message.from_user.id, "Неверный формат! Попробуйте еще раз.")
         bot.register_next_step_handler_by_chat_id(message.chat.id, second, dogovor)
+
 def first(message):
     dogovor = message.text
-    bot.send_message(message.from_user.id, f"Введите сумму платежа:")
+    bot.send_message(message.from_user.id, "Отлично, теперь введите сумму платежа:")
     bot.register_next_step_handler_by_chat_id(message.chat.id, second, dogovor)
-
-
+def check(user_id: int):
+    db_oject.execute(f"SELECT {user_id} FROM users")
+    print(db_oject.fetchone(), user_id)
+    return lambda x: user_id in db_oject.fetchone()
 @bot.message_handler(content_types=['text'])
 def message_handler(message):
     userid = message.from_user.id
     if message.text == "Оплатить":
-        bot.send_message(userid, "Введите номер заявки: ")
+        bot.send_message(userid, "Введите номер платежа: ")
         bot.register_next_step_handler_by_chat_id(message.chat.id, first)
     elif message.text == "Статус":
         status(userid, message)
     else:
-        bot.send_message(userid, "Нет такой команды, введдите ещё раз:")
+        bot.send_message(userid, "Простите, но я не знаю такую команду :<")
 
 # ##########################################------------------------
 # ##########################################------------------------

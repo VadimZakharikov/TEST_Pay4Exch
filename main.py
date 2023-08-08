@@ -336,19 +336,18 @@ def message_handler(message):
 # ##########################################------------------------
 # ##########################################------------------------
 
-@server.route('/process_data', methods=['GET'])
+@server.route(f"/{BOT_TOKEN}", methods=["POST"])
+def redirect_message():
+    json_string = request.get_data().decode("utf-8")
+    update = telebot.types.Update.de_json(json_string)
+    bot.process_new_updates([update])
+    return "!", 200
+
+@server.route('/process_data', methods=['GET', 'POST'])
 def process_data():
     data = request.args
     print("\n\\Переданные данные:", data)
     return "Успех!"
-
-#@server.route(f"/{BOT_TOKEN}", methods=["POST"])
-#def redirect_message():
-#    json_string = request.get_data().decode("utf-8")
-#    update = telebot.types.Update.de_json(json_string)
-#    bot.process_new_updates([update])
-#    return "!", 200
-
 
 if __name__ == "__main__":
     bot.remove_webhook()

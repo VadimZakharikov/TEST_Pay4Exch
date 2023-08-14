@@ -36,7 +36,7 @@ def start(message):
     result = db_oject.fetchone()
 
     if not result:
-        db_oject.execute("INSERT INTO users(id, username, status, comment) VALUES (%s, %s, %s, %s, %s)", (id, username, False, ''))
+        db_oject.execute("INSERT INTO users(id, username, status, comment) VALUES (%s, %s, %s, %s)", (id, username, False, ''))
         db_connection.commit()
         buttons = ["Оплатить", "Статус"]
         bot.send_message(id, f"You are identified.\nAll is ready.", reply_markup=ReplyKeyboardMarkup(resize_keyboard=True).add(*buttons))

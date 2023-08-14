@@ -104,8 +104,8 @@ def create_link(number, summ, desc):
         response = responseJSON.json()
         print(kvatance)
         print(response)
-        db_oject.execute(f"UPDATE users SET order_id = {kvatance['docnum']} WHERE id = {kvatance['user_id']}")
-        db_connection.commit()
+        #db_oject.execute(f"UPDATE users SET order_id = {kvatance['docnum']} WHERE id = {kvatance['user_id']}")
+        #db_connection.commit()
         return f"Ссылка для оплаты картой онлайн: {response['FormURL']}"
     except TimeoutError:
         return f"Ошибка: timeout error"

@@ -32,11 +32,11 @@ def start(message):
     username = message.from_user.username
     bot.reply_to(message, f"Hello, {username}!\nWe are checking your details...")
 
-    db_oject.execute(f"SELECT userdid FROM users WHERE userid = {id}")
+    db_oject.execute(f"SELECT id FROM users WHERE id = {id}")
     result = db_oject.fetchone()
 
     if not result:
-        db_oject.execute("INSERT INTO users(userid, username, orderid) VALUES (%s, %s, %s)", (id, username, ''))
+        db_oject.execute("INSERT INTO users(id, username, status, comment) VALUES (%s, %s, %s, %s, %s)", (id, username, False, ''))
         db_connection.commit()
         buttons = ["Оплатить", "Статус"]
         bot.send_message(id, f"You are identified.\nAll is ready.", reply_markup=ReplyKeyboardMarkup(resize_keyboard=True).add(*buttons))

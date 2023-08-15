@@ -121,6 +121,7 @@ def create_link(number, summ, desc):
         responseJSON = requests.get(PAY_URL,
                                     data=json.dumps(parameters, ensure_ascii=False).encode('utf-8'),
                                     headers=headers)
+        print(responseJSON)
         response = responseJSON.json()
         print(response)
         db_oject.execute(

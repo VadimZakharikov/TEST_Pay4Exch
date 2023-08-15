@@ -221,7 +221,6 @@ def redirect_message():
     bot.process_new_updates([update])
     return "!", 200
 
-
 if __name__ == "__main__":
     print('start!')
     bot.remove_webhook()

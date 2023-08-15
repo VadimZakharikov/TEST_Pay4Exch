@@ -6,6 +6,8 @@ import base64
 import hashlib
 import hmac
 
+from psycopg2 import sql
+
 from config import *
 from flask import Flask, request
 from datetime import datetime
@@ -56,11 +58,12 @@ def doc_nmbr():
 # ##########################################------------------------
 #= ПРВОЕРКА СТАТУСА ЗАЯВКИ =
 def status(user_id, message):
-    db_oject.execute(f"SELECT * FROM users")
+    db_oject.execute(f"SELECT * FROM \"order\"")
     users = db_oject.fetchall()
     for user in users:
-        if user[2] != None and user[0] == user_id:
-            parameters = dict(ExtID=user[2])
+        print(user)
+        if user[0] != None and user[1] == user_id:
+            parameters = dict(ExtID=user[0])
             signature = hmac.new(API_KEY.encode(), json.dumps(parameters, ensure_ascii=False).encode('utf-8'),
                                  digestmod=hashlib.sha1).digest()
             signature_base64 = base64.b64encode(signature).decode()
@@ -74,9 +77,12 @@ def status(user_id, message):
                                         headers=headers)
             response = responseJSON.json()
             pay_status = response['OrderInfo']['StateDescription']
+            update_query = sql.SQL("UPDATE \"order\" SET order_status = %s WHERE id = %s")
+            db_oject.execute(update_query, (pay_status, user_id))
+            db_connection.commit()
             if pay_status == "Успешно":
                 print("DELETE")
-                db_oject.execute(f"UPDATE users SET order_id = NULL WHERE id = {user_id}")
+                db_oject.execute(f"UPDATE \"order\" SET order_id = NULL WHERE id = {user_id}")
                 db_connection.commit()
             bot.send_message(user_id, f"Статус оплаты: {pay_status}")
             return
@@ -87,7 +93,7 @@ def create_link(number, summ, desc):
     parameters = dict(ExtID=number,
                       Amount=summ,
                       Description=desc,
-                      TTl="4.00:00:00",
+                      TTl="0.00:01:00",
                       OrderId=number)
     signature = hmac.new(API_KEY.encode(), json.dumps(parameters, ensure_ascii=False).encode('utf-8'),
                          digestmod=hashlib.sha1).digest()
@@ -104,22 +110,23 @@ def create_link(number, summ, desc):
         response = responseJSON.json()
         print(kvatance)
         print(response)
+
         update_query = sql.SQL(
-            "UPDATE order SET order_id = %s WHERE id = %s"
+            "UPDATE \"order\" SET order_id = %s WHERE id = %s"
         )
         insert_query = sql.SQL(
-            "INSERT INTO order (order_id, id, comment) "
-            "SELECT %s, %s, %s "
-            "WHERE NOT EXISTS (SELECT 1 FROM order WHERE id = %s)"
+            "INSERT INTO \"order\" (order_id, id, comment, order_status) "
+            "SELECT %s, %s, %s, %s"
+            "WHERE NOT EXISTS (SELECT 1 FROM \"order\" WHERE id = %s)"
         )
+        print(kvatance)
         db_oject.execute(update_query, (kvatance['docnum'], kvatance['user_id']))
+        db_connection.commit()
         if db_oject.rowcount == 0:
-            db_oject.execute(insert_query, (kvatance['user_id'], kvatance['docnum'], "", kvatance['user_id']))
+            db_oject.execute(insert_query, (kvatance['docnum'], kvatance['user_id'], "test", None, kvatance['user_id']))
 
         #db_oject.execute(f"UPDATE order SET order_id = {kvatance['docnum']} WHERE id = {kvatance['user_id']}")
         db_connection.commit()
-        #db_oject.execute(f"UPDATE orders SET order_id = {kvatance['docnum']} WHERE id = {kvatance['user_id']}")
-        #db_connection.commit()
         return f"Ссылка для оплаты картой онлайн: {response['FormURL']}"
     except TimeoutError:
         return f"Ошибка: timeout error"
@@ -166,25 +173,27 @@ def second(message, dogovor):
     except ValueError:
         bot.send_message(message.from_user.id, "Ошибка в сумме, попробуйте еще раз:")
         bot.register_next_step_handler_by_chat_id(message.chat.id, second, dogovor)
-
 def first(message):
     dogovor = message.text
     bot.send_message(message.from_user.id, "Введите сумму платежа:")
     bot.register_next_step_handler_by_chat_id(message.chat.id, second, dogovor)
 def check(user_id: int):
-    db_oject.execute(f"SELECT {user_id} FROM users")
-    print(db_oject.fetchone(), user_id)
-    return lambda x: user_id in db_oject.fetchone()
+    db_oject.execute(f"SELECT status FROM users where id = {user_id}")
+    result = db_oject.fetchall()
+    return result[0][0]
 @bot.message_handler(content_types=['text'])
 def message_handler(message):
     userid = message.from_user.id
-    if message.text == "Оплатить":
-        bot.send_message(userid, "Введите номер платежа: ")
-        bot.register_next_step_handler_by_chat_id(message.chat.id, first)
-    elif message.text == "Статус":
-        status(userid, message)
+    if check(userid):
+        if message.text == "Оплатить":
+            bot.send_message(userid, "Введите номер платежа: ")
+            bot.register_next_step_handler_by_chat_id(message.chat.id, first)
+        elif message.text == "Статус":
+            status(userid, message)
+        else:
+            bot.send_message(userid, "Нет такой команды, введите команду:")
     else:
-        bot.send_message(userid, "Нет такой команды, введите команду:")
+        bot.send_message(userid, "Доступ ограничен! /start!")
 
 # ##########################################------------------------
 # ##########################################------------------------
@@ -212,4 +221,5 @@ def redirect_message():
 if __name__ == "__main__":
     bot.remove_webhook()
     #bot.set_webhook(url=APP_URL)
-    #server.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+    bot.infinity_polling()
+    server.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))

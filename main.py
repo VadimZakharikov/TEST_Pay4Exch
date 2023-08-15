@@ -62,38 +62,6 @@ def doc_nmbr():
     return  str(datetime.utcnow()).replace("-", "").replace(":","").replace(" ", "").replace(".", "")
 # ##########################################------------------------
 #
-new_status_list = []
-
-#db_oject.execute("select * from orders")
-#new_status_list = db_oject.fetchall()
-global old_status_list
-old_status_list = []
-#тест
-def a(old_status_list):
-    db_oject.execute("select * from orders")
-    new_status_list = db_oject.fetchall()
-    if len(old_status_list) == 0:
-        old_status_list = new_status_list
-        #a(old_status_list)
-    for status in new_status_list:
-        for old_status in old_status_list:
-            if old_status[0] == status[0] and old_status[3] != status[3]:
-                parameters = dict(ExtID=status[0])
-                signature = hmac.new(API_KEY.encode(), json.dumps(parameters, ensure_ascii=False).encode('utf-8'),
-                                     digestmod=hashlib.sha1).digest()
-                signature_base64 = base64.b64encode(signature).decode()
-                headers = {
-                    'TCB-Header-Login': LOGIN,
-                    'TCB-Header-Sign': signature_base64,
-                    "Content-Type": "application/json; charset=utf-8"
-                }
-                responseJSON = requests.get("https://paytest.online.tkbbank.ru/api/v1/order/state",
-                                            data=json.dumps(parameters, ensure_ascii=False).encode('utf-8'),
-                                            headers=headers)
-                response = responseJSON.json()
-                pay_status = response['OrderInfo']['StateDescription']
-                bot.send_message(status[1], f"Заявка {status[4]} на сумму {response['OrderInfo']['Amount'] / 100:.2f} RUB: {pay_status}\n{status[5]}")
-    time.sleep(5)
 
 
 #= ПРВОЕРКА СТАТУСА ЗАЯВКИ =

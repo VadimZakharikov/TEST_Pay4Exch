@@ -178,6 +178,7 @@ def first(message):
     bot.send_message(message.from_user.id, "Введите сумму платежа:")
     bot.register_next_step_handler_by_chat_id(message.chat.id, second, dogovor)
 def check(user_id: int):
+    print(f"check {user_id}")
     db_oject.execute(f"SELECT status FROM users where id = {user_id}")
     result = db_oject.fetchall()
     return result[0][0]

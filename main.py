@@ -1,5 +1,4 @@
-#
-import os
+import time
 import telebot
 import logging
 import psycopg2
@@ -33,19 +32,24 @@ db_oject = db_connection.cursor()
 def start(message):
     id = message.from_user.id
     username = message.from_user.username
-    bot.reply_to(message, f"Hello, {username}!\nWe are checking your details...")
+    #bot.reply_to(message, f"Здравствуйте, {username}!\nМы проверяем Ваши данные...", reply_markup=ReplyKeyboardMarkup(resize_keyboard=True).add(*buttons))
 
-    db_oject.execute(f"SELECT id FROM users WHERE id = {id}")
+    db_oject.execute(f"SELECT id, status FROM users WHERE id = {id}")
     result = db_oject.fetchone()
-
+    buttons = ["Оплатить", "Статус"]
+    print(result)
+    if result[1] == True:
+        bot.send_message(id, "Данные проверены. Доступ разрешен.", reply_markup=ReplyKeyboardMarkup(resize_keyboard=True).add(*buttons))
+        return
+    elif result[1] == False:
+        bot.send_message(id, "Доступ запрещен. Обратитесь к администратору.")
+        return
     if not result:
-        db_oject.execute("INSERT INTO users(id, username, status, comment) VALUES (%s, %s, %s, %s)", (id, username, False, ''))
+        db_oject.execute("INSERT INTO users(id, username, status, comment) VALUES (%s, %s, %s, %s)", (id, username, None, ''))
         db_connection.commit()
-        buttons = ["Оплатить", "Статус"]
-        bot.send_message(id, f"You are identified.\nAll is ready.", reply_markup=ReplyKeyboardMarkup(resize_keyboard=True).add(*buttons))
+        bot.send_message(id, f"Здравствуйте, {username}. Мы проверяем Ваши данные...", reply_markup=ReplyKeyboardMarkup(resize_keyboard=True).add(*buttons))
     else:
-        buttons = ["Оплатить", "Статус"]
-        bot.send_message(id, f"Identification is not required.\nYou have already been identified.", reply_markup=ReplyKeyboardMarkup(resize_keyboard=True).add(*buttons))
+        bot.send_message(id, f"Здравствуйте, {username}. Мы все еще проверяем Ваши данные", reply_markup=ReplyKeyboardMarkup(resize_keyboard=True).add(*buttons))
 
 # ##########################################------------------------
 #= НОМЕР ДОКУМЕНТА =
@@ -57,8 +61,43 @@ def docnum(message):
 def doc_nmbr():
     return  str(datetime.utcnow()).replace("-", "").replace(":","").replace(" ", "").replace(".", "")
 # ##########################################------------------------
+#
+new_status_list = []
+
+#db_oject.execute("select * from orders")
+#new_status_list = db_oject.fetchall()
+global old_status_list
+old_status_list = []
+#тест
+def a(old_status_list):
+    db_oject.execute("select * from orders")
+    new_status_list = db_oject.fetchall()
+    if len(old_status_list) == 0:
+        old_status_list = new_status_list
+        #a(old_status_list)
+    for status in new_status_list:
+        for old_status in old_status_list:
+            if old_status[0] == status[0] and old_status[3] != status[3]:
+                parameters = dict(ExtID=status[0])
+                signature = hmac.new(API_KEY.encode(), json.dumps(parameters, ensure_ascii=False).encode('utf-8'),
+                                     digestmod=hashlib.sha1).digest()
+                signature_base64 = base64.b64encode(signature).decode()
+                headers = {
+                    'TCB-Header-Login': LOGIN,
+                    'TCB-Header-Sign': signature_base64,
+                    "Content-Type": "application/json; charset=utf-8"
+                }
+                responseJSON = requests.get("https://paytest.online.tkbbank.ru/api/v1/order/state",
+                                            data=json.dumps(parameters, ensure_ascii=False).encode('utf-8'),
+                                            headers=headers)
+                response = responseJSON.json()
+                pay_status = response['OrderInfo']['StateDescription']
+                bot.send_message(status[1], f"Заявка {status[4]} на сумму {response['OrderInfo']['Amount'] / 100:.2f} RUB: {pay_status}\n{status[5]}")
+    time.sleep(5)
+
+
 #= ПРВОЕРКА СТАТУСА ЗАЯВКИ =
-def status(user_id, message):
+def status(user_id):
     db_oject.execute(f"SELECT * FROM \"orders\"")
     users = db_oject.fetchall()
     has_active_orders = False
@@ -74,7 +113,7 @@ def status(user_id, message):
                 'TCB-Header-Sign': signature_base64,
                 "Content-Type": "application/json; charset=utf-8"
             }
-            responseJSON = requests.get(f"{PAY_URL}api/v1/order/state",
+            responseJSON = requests.get("https://paytest.online.tkbbank.ru/api/v1/order/state",
                                         data=json.dumps(parameters, ensure_ascii=False).encode('utf-8'),
                                         headers=headers)
             response = responseJSON.json()
@@ -100,7 +139,7 @@ def create_link(number, summ, desc):
     parameters = dict(ExtID=number,
                       Amount=summ,
                       Description=desc,
-                      TTl=LIFE_TIME,
+                      TTl="0.00:01:00",
                       OrderId=number)
     signature = hmac.new(API_KEY.encode(), json.dumps(parameters, ensure_ascii=False).encode('utf-8'),
                          digestmod=hashlib.sha1).digest()
@@ -111,15 +150,16 @@ def create_link(number, summ, desc):
         "Content-Type": "application/json; charset=utf-8"
     }
     try:
-        responseJSON = requests.get(f"{PAY_URL}api/v1/card/unregistered/debit",
+        responseJSON = requests.get(PAY_URL,
                                     data=json.dumps(parameters, ensure_ascii=False).encode('utf-8'),
                                     headers=headers)
         response = responseJSON.json()
         print(response)
         db_oject.execute(
-            "INSERT INTO \"orders\" (order_id, id, comment, order_status, order_description, order_url) VALUES (%s, %s, %s, %s, %s, %s)",
+            "INSERT INTO \"orders\" (order_id, id, comment, order_status, order_description, order_URL) VALUES (%s, %s, %s, %s, %s, %s)",
             (kvatance['docnum'], kvatance['user_id'], "test", "проверка", kvatance['id'], response['FormURL'])
         )
+        db_connection.commit()
         return f"Ссылка для оплаты картой онлайн: {response['FormURL']}"
     except TimeoutError:
         return f"Ошибка: timeout error"
@@ -127,11 +167,12 @@ def create_link(number, summ, desc):
 
 @bot.message_handler(commands=["pay"])
 def pay(message):
-    if check(message.from_user.id):
-        bot.send_message(message.chat.id, 'Введите номер заявки:')
+    stat, mes = check(message.from_user.id, message.from_user.username)
+    if stat:
+        bot.send_message(message.chat.id, f'{mes}\n\nВведите номер заявки:')
         bot.register_next_step_handler(message, first)
     else:
-        bot.send_message(message.from_user.id, "Доступ ограничен! /start!")
+        bot.send_message(message.from_user.id, mes)
 @bot.callback_query_handler(func=lambda call: True)
 def callback_inline(call):
     bot.clear_step_handler_by_chat_id(chat_id=call.message.chat.id)
@@ -178,7 +219,13 @@ def check(user_id: int):
     print(f"check {user_id}")
     db_oject.execute(f"SELECT status FROM users where id = {user_id}")
     result = db_oject.fetchall()
-    print(result[0])
+    print(result[0][0])
+    if result[0][0] == False:
+        return False
+    elif result[0][0] == None:
+        return False
+    else:
+        return True
     return result[0][0]
 @bot.message_handler(content_types=['text'])
 def message_handler(message):
@@ -187,16 +234,16 @@ def message_handler(message):
     print(f"user: {userid}")
     if message.text == "Оплатить":
         print(f"user: {userid}")
-        if check(userid):
-            bot.send_message(userid, "Введите номер платежа: ")
-            bot.register_next_step_handler_by_chat_id(message.chat.id, first)
+        if check(message.from_user.id):
+            bot.send_message(message.chat.id, f'Введите номер заявки:')
+            bot.register_next_step_handler(message, first)
         else:
-            bot.send_message(userid, "Доступ ограничен! /start!")
+            bot.send_message(message.from_user.id, "Сервис не доступен.")
     elif message.text == "Статус":
-        if check(userid):
-            status(userid, message)
+        if check(message.from_user.id):
+           status(message.from_user.id)
         else:
-            bot.send_message(userid, "Доступ ограничен! /start!")
+            bot.send_message(message.from_user.id, "Сервис не доступен.")
     else:
         bot.send_message(userid, "Нет такой команды, введите команду:")
 
@@ -222,8 +269,10 @@ def redirect_message():
     bot.process_new_updates([update])
     return "!", 200
 
+
 if __name__ == "__main__":
     print('start!')
     #bot.remove_webhook()
-    #bot.set_webhook(url=APP_URL)
-    #server.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+    bot.set_webhook(url=APP_URL)
+    #bot.infinity_polling()
+    server.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))

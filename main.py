@@ -104,7 +104,21 @@ def create_link(number, summ, desc):
         response = responseJSON.json()
         print(kvatance)
         print(response)
-        #db_oject.execute(f"UPDATE users SET order_id = {kvatance['docnum']} WHERE id = {kvatance['user_id']}")
+        update_query = sql.SQL(
+            "UPDATE order SET order_id = %s WHERE id = %s"
+        )
+        insert_query = sql.SQL(
+            "INSERT INTO order (order_id, id, comment) "
+            "SELECT %s, %s, %s "
+            "WHERE NOT EXISTS (SELECT 1 FROM order WHERE id = %s)"
+        )
+        db_oject.execute(update_query, (kvatance['docnum'], kvatance['user_id']))
+        if db_oject.rowcount == 0:
+            db_oject.execute(insert_query, (kvatance['user_id'], kvatance['docnum'], "", kvatance['user_id']))
+
+        #db_oject.execute(f"UPDATE order SET order_id = {kvatance['docnum']} WHERE id = {kvatance['user_id']}")
+        db_connection.commit()
+        #db_oject.execute(f"UPDATE orders SET order_id = {kvatance['docnum']} WHERE id = {kvatance['user_id']}")
         #db_connection.commit()
         return f"Ссылка для оплаты картой онлайн: {response['FormURL']}"
     except TimeoutError:

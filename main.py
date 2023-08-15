@@ -60,6 +60,7 @@ def doc_nmbr():
 def status(user_id, message):
     db_oject.execute(f"SELECT * FROM \"order\"")
     users = db_oject.fetchall()
+    has_active_orders = False
     for user in users:
         print(user)
         if user[0] != None and user[1] == user_id:
@@ -80,13 +81,16 @@ def status(user_id, message):
             update_query = sql.SQL("UPDATE \"order\" SET order_status = %s WHERE id = %s")
             db_oject.execute(update_query, (pay_status, user_id))
             db_connection.commit()
-            if pay_status == "Успешно":
+            print(response)
+            has_active_orders = True
+            if pay_status == "Успешно" or "Время оплаты заявки истекло" in pay_status:
                 print("DELETE")
-                db_oject.execute(f"UPDATE \"order\" SET order_id = NULL WHERE id = {user_id}")
+                db_oject.execute(f"delete from \"order\" WHERE order_id = {user[0]}")
                 db_connection.commit()
-            bot.send_message(user_id, f"Статус оплаты: {pay_status}")
-            return
-    bot.send_message(user_id, "У вас нет активных заявок.")
+            bot.send_message(user_id, f"Статус оплаты по заявке {user[4]} на сумму {response['OrderInfo']['Amount'] / 100:.2f} RUB: {pay_status}")
+    if not has_active_orders:
+        bot.send_message(user_id, "У вас нет активных заявок.")
+    #bot.send_message(user_id, "У вас нет активных заявок.")
 
 #= ЗАЯВКА В ПЛАТЁЖНЫЙ ШЛЮЗ =
 def create_link(number, summ, desc):
@@ -109,24 +113,10 @@ def create_link(number, summ, desc):
                                     headers=headers)
         response = responseJSON.json()
         print(kvatance)
-        print(response)
-
-        update_query = sql.SQL(
-            "UPDATE \"order\" SET order_id = %s WHERE id = %s"
+        db_oject.execute(
+            "INSERT INTO \"order\" (order_id, id, comment, order_status, order_name) VALUES (%s, %s, %s, %s, %s)",
+            (kvatance['docnum'], kvatance['user_id'], "test", "проверка", kvatance['id'])
         )
-        insert_query = sql.SQL(
-            "INSERT INTO \"order\" (order_id, id, comment, order_status) "
-            "SELECT %s, %s, %s, %s "
-            "WHERE NOT EXISTS (SELECT 1 FROM \"order\" WHERE id = %s)"
-        )
-        print(kvatance)
-        db_oject.execute(update_query, (kvatance['docnum'], kvatance['user_id']))
-        db_connection.commit()
-        if db_oject.rowcount == 0:
-            db_oject.execute(insert_query, (kvatance['docnum'], kvatance['user_id'], "test", None, kvatance['user_id']))
-
-        #db_oject.execute(f"UPDATE order SET order_id = {kvatance['docnum']} WHERE id = {kvatance['user_id']}")
-        db_connection.commit()
         return f"Ссылка для оплаты картой онлайн: {response['FormURL']}"
     except TimeoutError:
         return f"Ошибка: timeout error"
@@ -232,7 +222,7 @@ def redirect_message():
 
 if __name__ == "__main__":
     print('start!')
-    #bot.remove_webhook()
-    #bot.set_webhook(url=APP_URL)
+    bot.remove_webhook()
+    bot.set_webhook(url=APP_URL)
     #bot.infinity_polling()
-    #server.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+    server.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))

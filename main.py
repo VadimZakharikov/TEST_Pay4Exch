@@ -141,12 +141,14 @@ def pay(message):
 def callback_inline(call):
     bot.clear_step_handler_by_chat_id(chat_id=call.message.chat.id)
     if call.data == 'yes':
+        bot.answer_callback_query(call.id, text="Генерируем ссылку...")
         bot.send_message(call.from_user.id,
                          f"<i>{create_link(kvatance['docnum'], float(kvatance['price']) * 100, kvatance['id'])}</i>",
                          parse_mode="HTML", reply_markup=ReplyKeyboardMarkup(resize_keyboard=True).add("Оплатить", "Статус"))
-
+    
         return
     elif call.data == 'no':
+        bot.answer_callback_query(call.id, text="Отменено!")
         buttons = ["Оплатить", "Статус"]
         bot.send_message(call.from_user.id, "Оплата отменена!",
                          reply_markup=ReplyKeyboardMarkup(resize_keyboard=True).add(*buttons))

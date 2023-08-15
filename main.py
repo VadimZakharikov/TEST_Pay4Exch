@@ -116,7 +116,7 @@ def create_link(number, summ, desc):
         response = responseJSON.json()
         print(response)
         db_oject.execute(
-            "INSERT INTO \"orders\" (order_id, id, comment, order_status, order_description, order_URL) VALUES (%s, %s, %s, %s, %s, %s)",
+            "INSERT INTO \"orders\" (order_id, id, comment, order_status, order_description, order_url) VALUES (%s, %s, %s, %s, %s, %s)",
             (kvatance['docnum'], kvatance['user_id'], "test", "проверка", kvatance['id'], response['FormURL'])
         )
         return f"Ссылка для оплаты картой онлайн: {response['FormURL']}"
@@ -226,5 +226,4 @@ if __name__ == "__main__":
     print('start!')
     bot.remove_webhook()
     bot.set_webhook(url=APP_URL)
-    #bot.infinity_polling()
     server.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))

@@ -118,7 +118,7 @@ def create_link(number, summ, desc):
         "Content-Type": "application/json; charset=utf-8"
     }
     try:
-        responseJSON = requests.get(PAY_URL,
+        responseJSON = requests.get(f"PAY_URL{api/v1/card/unregistered/debit}",
                                     data=json.dumps(parameters, ensure_ascii=False).encode('utf-8'),
                                     headers=headers)
         print(responseJSON)

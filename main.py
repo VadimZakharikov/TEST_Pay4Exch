@@ -34,22 +34,34 @@ def start(message):
     username = message.from_user.username
     #bot.reply_to(message, f"Здравствуйте, {username}!\nМы проверяем Ваши данные...", reply_markup=ReplyKeyboardMarkup(resize_keyboard=True).add(*buttons))
 
-    db_oject.execute(f"SELECT id, status FROM users WHERE id = {id}")
+    db_oject.execute(f"SELECT status, id FROM users WHERE id = {id}")
+    result = db_oject.fetchone()
+    if result == None:
+        db_oject.execute("INSERT INTO users(id, username, status, comment) VALUES (%s, %s, %s, %s)",
+                         (id, username, None, ''))
+        db_connection.commit()
+    db_oject.execute(f"SELECT status, id FROM users WHERE id = {id}")
     result = db_oject.fetchone()
     buttons = ["Оплатить", "Статус"]
     print(result)
-    if result[1] == True:
-        bot.send_message(id, "Данные проверены. Доступ разрешен.", reply_markup=ReplyKeyboardMarkup(resize_keyboard=True).add(*buttons))
-        return
-    elif result[1] == False:
+    if result[0] == None:
+        print("v")
+        bot.send_message(id, f"Здравствуйте, {username}. Мы все еще проверяем Ваши данные...",
+                         reply_markup=ReplyKeyboardMarkup(resize_keyboard=True).add(*buttons))
+    elif result[0] == False:
+        print("f")
         bot.send_message(id, "Доступ запрещен. Обратитесь к администратору.")
         return
-    if not result:
-        db_oject.execute("INSERT INTO users(id, username, status, comment) VALUES (%s, %s, %s, %s)", (id, username, None, ''))
-        db_connection.commit()
-        bot.send_message(id, f"Здравствуйте, {username}. Мы проверяем Ваши данные...", reply_markup=ReplyKeyboardMarkup(resize_keyboard=True).add(*buttons))
-    else:
-        bot.send_message(id, f"Здравствуйте, {username}. Мы все еще проверяем Ваши данные", reply_markup=ReplyKeyboardMarkup(resize_keyboard=True).add(*buttons))
+    if result[0] == True:
+        print("t")
+        bot.send_message(id, "Данные проверены. Доступ разрешен.",
+                         reply_markup=ReplyKeyboardMarkup(resize_keyboard=True).add(*buttons))
+        return
+    #else:
+        #db_oject.execute("INSERT INTO users(id, username, status, comment) VALUES (%s, %s, %s, %s)",
+                        #(id, username, None, ''))
+        #db_connection.commit()
+        #bot.send_message(id, f"Здравствуйте, {username}. Мы все еще проверяем Ваши данные", reply_markup=ReplyKeyboardMarkup(resize_keyboard=True).add(*buttons))
 
 # ##########################################------------------------
 #= НОМЕР ДОКУМЕНТА =
@@ -71,7 +83,7 @@ def status(user_id):
     has_active_orders = False
     for user in users:
         print(user)
-        if user[0] != None and user[1] == user_id:
+        if user[0] != None and user[1] == user_id and user[3] != None:
             parameters = dict(ExtID=user[0])
             signature = hmac.new(API_KEY.encode(), json.dumps(parameters, ensure_ascii=False).encode('utf-8'),
                                  digestmod=hashlib.sha1).digest()
@@ -81,23 +93,24 @@ def status(user_id):
                 'TCB-Header-Sign': signature_base64,
                 "Content-Type": "application/json; charset=utf-8"
             }
-            responseJSON = requests.get("https://paytest.online.tkbbank.ru/api/v1/order/state",
+            responseJSON = requests.get(f"{PAY_URL}api/v1/order/state",
                                         data=json.dumps(parameters, ensure_ascii=False).encode('utf-8'),
                                         headers=headers)
             response = responseJSON.json()
             pay_status = response['OrderInfo']['StateDescription']
-            update_query = sql.SQL("UPDATE \"orders\" SET order_status = %s WHERE id = %s")
-            db_oject.execute(update_query, (pay_status, user_id))
+            update_query = sql.SQL("UPDATE \"orders\" SET order_status = %s WHERE order_id = %s")
+            db_oject.execute(update_query, (pay_status, user[0]))
             db_connection.commit()
             print(response)
             has_active_orders = True
-            if pay_status != "Успешно" or "Время оплаты заявки истекло" not in pay_status:
+            if pay_status == "Успешно" or "Время оплаты заявки истекло" in pay_status:
                 print("DELETE")
-                #db_oject.execute(f"delete from \"order\" WHERE order_id = {user[0]}")
-                #db_connection.commit()
-                bot.send_message(user_id, f"Заявка {user[4]} на сумму {response['OrderInfo']['Amount'] / 100:.2f} RUB: {pay_status}\n{user[5]}")
+                db_oject.execute(f"update \"orders\" set order_status = %s WHERE order_id = %s", (None, user[0]))
+                db_connection.commit()
             else:
                 print("do")
+            bot.send_message(user_id,
+                             f"Заявка {user[4]} на сумму {response['OrderInfo']['Amount'] / 100:.2f} RUB: {pay_status}\n{user[5]}")
     if not has_active_orders:
         bot.send_message(user_id, "У вас нет активных заявок.")
     #bot.send_message(user_id, "У вас нет активных заявок.")
@@ -121,7 +134,6 @@ def create_link(number, summ, desc):
         responseJSON = requests.get(f"{PAY_URL}api/v1/card/unregistered/debit",
                                     data=json.dumps(parameters, ensure_ascii=False).encode('utf-8'),
                                     headers=headers)
-        print(responseJSON)
         response = responseJSON.json()
         print(response)
         db_oject.execute(
@@ -243,5 +255,5 @@ if __name__ == "__main__":
     print('start!')
     #bot.remove_webhook()
     #bot.set_webhook(url=APP_URL)
-    #bot.infinity_polling()
+    bot.infinity_polling()
     #server.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))

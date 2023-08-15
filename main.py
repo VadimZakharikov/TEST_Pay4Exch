@@ -5,7 +5,7 @@ import psycopg2
 import base64
 import hashlib
 import hmac
-
+import os
 from psycopg2 import sql
 
 from config import *
@@ -136,11 +136,11 @@ def create_link(number, summ, desc):
 @bot.message_handler(commands=["pay"])
 def pay(message):
     stat, mes = check(message.from_user.id, message.from_user.username)
-    if stat:
-        bot.send_message(message.chat.id, f'{mes}\n\nВведите номер заявки:')
+    if check(message.from_user.id):
+        bot.send_message(message.chat.id, f'Введите номер заявки:')
         bot.register_next_step_handler(message, first)
     else:
-        bot.send_message(message.from_user.id, mes)
+        bot.send_message(message.from_user.id, "Сервис не доступен.")
 @bot.callback_query_handler(func=lambda call: True)
 def callback_inline(call):
     bot.clear_step_handler_by_chat_id(chat_id=call.message.chat.id)

@@ -93,7 +93,7 @@ def create_link(number, summ, desc):
     parameters = dict(ExtID=number,
                       Amount=summ,
                       Description=desc,
-                      TTl=LIFE_TIME,
+                      TTl="0.00:01:00",
                       OrderId=number)
     signature = hmac.new(API_KEY.encode(), json.dumps(parameters, ensure_ascii=False).encode('utf-8'),
                          digestmod=hashlib.sha1).digest()
@@ -116,7 +116,7 @@ def create_link(number, summ, desc):
         )
         insert_query = sql.SQL(
             "INSERT INTO \"order\" (order_id, id, comment, order_status) "
-            "SELECT %s, %s, %s, %s"
+            "SELECT %s, %s, %s, %s "
             "WHERE NOT EXISTS (SELECT 1 FROM \"order\" WHERE id = %s)"
         )
         print(kvatance)
@@ -134,9 +134,11 @@ def create_link(number, summ, desc):
 
 @bot.message_handler(commands=["pay"])
 def pay(message):
-    bot.send_message(message.chat.id, 'Введите номер заявки:')
-    bot.register_next_step_handler(message, first)
-
+    if check(message.from_user.id):
+        bot.send_message(message.chat.id, 'Введите номер заявки:')
+        bot.register_next_step_handler(message, first)
+    else:
+        bot.send_message(message.from_user.id, "Доступ ограничен! /start!")
 @bot.callback_query_handler(func=lambda call: True)
 def callback_inline(call):
     bot.clear_step_handler_by_chat_id(chat_id=call.message.chat.id)
@@ -145,7 +147,7 @@ def callback_inline(call):
         bot.send_message(call.from_user.id,
                          f"<i>{create_link(kvatance['docnum'], float(kvatance['price']) * 100, kvatance['id'])}</i>",
                          parse_mode="HTML", reply_markup=ReplyKeyboardMarkup(resize_keyboard=True).add("Оплатить", "Статус"))
-    
+
         return
     elif call.data == 'no':
         bot.answer_callback_query(call.id, text="Отменено!")
@@ -183,20 +185,27 @@ def check(user_id: int):
     print(f"check {user_id}")
     db_oject.execute(f"SELECT status FROM users where id = {user_id}")
     result = db_oject.fetchall()
+    print(result[0])
     return result[0][0]
 @bot.message_handler(content_types=['text'])
 def message_handler(message):
     userid = message.from_user.id
-    if check(userid):
-        if message.text == "Оплатить":
+    print(message)
+    print(f"user: {userid}")
+    if message.text == "Оплатить":
+        print(f"user: {userid}")
+        if check(userid):
             bot.send_message(userid, "Введите номер платежа: ")
             bot.register_next_step_handler_by_chat_id(message.chat.id, first)
-        elif message.text == "Статус":
+        else:
+            bot.send_message(userid, "Доступ ограничен! /start!")
+    elif message.text == "Статус":
+        if check(userid):
             status(userid, message)
         else:
-            bot.send_message(userid, "Нет такой команды, введите команду:")
+            bot.send_message(userid, "Доступ ограничен! /start!")
     else:
-        bot.send_message(userid, "Доступ ограничен! /start!")
+        bot.send_message(userid, "Нет такой команды, введите команду:")
 
 # ##########################################------------------------
 # ##########################################------------------------
@@ -222,8 +231,8 @@ def redirect_message():
 
 
 if __name__ == "__main__":
-    print("asd")
-    #bot.remove_webhook()
-    #bot.set_webhook(url=APP_URL)
+    print('start!')
+    bot.remove_webhook()
+    bot.set_webhook(url=APP_URL)
     #bot.infinity_polling()
-    #server.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+    server.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))

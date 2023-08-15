@@ -58,7 +58,7 @@ def doc_nmbr():
 # ##########################################------------------------
 #= ПРВОЕРКА СТАТУСА ЗАЯВКИ =
 def status(user_id, message):
-    db_oject.execute(f"SELECT * FROM \"order\"")
+    db_oject.execute(f"SELECT * FROM \"orders\"")
     users = db_oject.fetchall()
     has_active_orders = False
     for user in users:
@@ -78,16 +78,18 @@ def status(user_id, message):
                                         headers=headers)
             response = responseJSON.json()
             pay_status = response['OrderInfo']['StateDescription']
-            update_query = sql.SQL("UPDATE \"order\" SET order_status = %s WHERE id = %s")
+            update_query = sql.SQL("UPDATE \"orders\" SET order_status = %s WHERE id = %s")
             db_oject.execute(update_query, (pay_status, user_id))
             db_connection.commit()
             print(response)
             has_active_orders = True
-            if pay_status == "Успешно" or "Время оплаты заявки истекло" in pay_status:
+            if pay_status != "Успешно" or "Время оплаты заявки истекло" not in pay_status:
                 print("DELETE")
-                db_oject.execute(f"delete from \"order\" WHERE order_id = {user[0]}")
-                db_connection.commit()
-            bot.send_message(user_id, f"Статус оплаты по заявке {user[4]} на сумму {response['OrderInfo']['Amount'] / 100:.2f} RUB: {pay_status}")
+                #db_oject.execute(f"delete from \"order\" WHERE order_id = {user[0]}")
+                #db_connection.commit()
+                bot.send_message(user_id, f"Заявка {user[4]} на сумму {response['OrderInfo']['Amount'] / 100:.2f} RUB: {pay_status}\n{user[5]}")
+            else:
+                print("do")
     if not has_active_orders:
         bot.send_message(user_id, "У вас нет активных заявок.")
     #bot.send_message(user_id, "У вас нет активных заявок.")
@@ -112,10 +114,10 @@ def create_link(number, summ, desc):
                                     data=json.dumps(parameters, ensure_ascii=False).encode('utf-8'),
                                     headers=headers)
         response = responseJSON.json()
-        print(kvatance)
+        print(response)
         db_oject.execute(
-            "INSERT INTO \"order\" (order_id, id, comment, order_status, order_name) VALUES (%s, %s, %s, %s, %s)",
-            (kvatance['docnum'], kvatance['user_id'], "test", "проверка", kvatance['id'])
+            "INSERT INTO \"orders\" (order_id, id, comment, order_status, order_description, order_URL) VALUES (%s, %s, %s, %s, %s, %s)",
+            (kvatance['docnum'], kvatance['user_id'], "test", "проверка", kvatance['id'], response['FormURL'])
         )
         return f"Ссылка для оплаты картой онлайн: {response['FormURL']}"
     except TimeoutError:
@@ -222,7 +224,7 @@ def redirect_message():
 
 if __name__ == "__main__":
     print('start!')
-    #bot.remove_webhook()
-    #bot.set_webhook(url=APP_URL)
+    bot.remove_webhook()
+    bot.set_webhook(url=APP_URL)
     #bot.infinity_polling()
-    #server.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+    server.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))

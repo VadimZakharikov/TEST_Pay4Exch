@@ -9,4 +9,4 @@ LIFE_TIME="4.00:00:00" #4 days
 HEROKU_APP_NAME = os.getenv('HEROKU_APP_NAME')
 WEBHOOK_HOST = f'https://{HEROKU_APP_NAME}.herokuapp.com'
 WEBHOOK_PATH = f'/{BOT_TOKEN}'
-WEBHOOK_URL = f'https://testbot-pay-ce2ebad6af24.herokuapp.com/{BOT_TOKEN}'
+WEBHOOK_URL = f'https://pay4exch-telegram.herokuapp.com/{BOT_TOKEN}'

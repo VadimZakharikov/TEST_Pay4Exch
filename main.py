@@ -120,7 +120,7 @@ def create_link(number, summ, desc):
     parameters = dict(ExtID=number,
                       Amount=summ,
                       Description=desc,
-                      TTl="0.00:01:00",
+                      TTl=LIFE_TIME,
                       OrderId=number)
     signature = hmac.new(API_KEY.encode(), json.dumps(parameters, ensure_ascii=False).encode('utf-8'),
                          digestmod=hashlib.sha1).digest()

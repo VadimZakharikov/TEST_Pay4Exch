@@ -182,6 +182,10 @@ def second(message, dogovor):
     global kvatance
     try:
         summa = float(summa)
+        if summa == 0:
+            bot.send_message(message.from_user.id, "Сумма должно быть больше чем 0.00 rub!")
+            bot.register_next_step_handler_by_chat_id(message.chat.id, second, dogovor)
+            return
         btn1 = InlineKeyboardButton("Ок", callback_data="yes")
         btn2 = InlineKeyboardButton("Отмена", callback_data="no")
         summa = round(summa, 2)

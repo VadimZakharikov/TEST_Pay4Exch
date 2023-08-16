@@ -118,7 +118,7 @@ async def create_link(number, summ, desc, state, userid):
     parameters = dict(ExtID=number,
                       Amount=summ,
                       Description=desc,
-                      TTl="4.00:00:00",
+                      TTl=config.LIFE_TIME,
                       OrderId=number)
     signature = hmac.new(config.API_KEY.encode(), json.dumps(parameters, ensure_ascii=False).encode('utf-8'),
                          digestmod=hashlib.sha1).digest()

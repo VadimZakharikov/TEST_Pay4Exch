@@ -6,8 +6,8 @@ from aiogram.utils.executor import start_webhook
 import config
 from bot import dp, bot
 
-WEBAPP_HOST = '127.0.0.1'
-WEBAPP_PORT = int(os.getenv('PORT', 8000))
+WEBAPP_HOST = '0.0.0.0'
+WEBAPP_PORT = int(os.getenv('PORT', 0))
 
 async def run_django_server():
     server = WSGIServer((WEBAPP_HOST, WEBAPP_PORT), WSGIHandler())

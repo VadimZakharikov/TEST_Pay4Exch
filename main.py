@@ -93,7 +93,7 @@ def status(user_id):
                 'TCB-Header-Sign': signature_base64,
                 "Content-Type": "application/json; charset=utf-8"
             }
-            responseJSON = requests.get(f"{PAY_URL}api/v1/order/state",
+            responseJSON = requests.get("https://paytest.online.tkbbank.ru/api/v1/order/state",
                                         data=json.dumps(parameters, ensure_ascii=False).encode('utf-8'),
                                         headers=headers)
             response = responseJSON.json()
@@ -253,7 +253,7 @@ def redirect_message():
 
 if __name__ == "__main__":
     print('start!')
-    #bot.remove_webhook()
-    #bot.set_webhook(url=APP_URL)
-    bot.infinity_polling()
-    #server.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+    bot.remove_webhook()
+    bot.set_webhook(url=APP_URL)
+    #bot.infinity_polling()
+    server.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))

@@ -242,4 +242,4 @@ async def message_handler(message):
 
 loop = asyncio.new_event_loop()
 result = loop.run_until_complete(conn())
-executor.start_polling(dp, loop=loop, skip_updates=True)
+#executor.start_polling(dp, loop=loop, skip_updates=True)

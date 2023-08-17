@@ -34,5 +34,5 @@ def start_aio():
     )
 
 if __name__ == "__main__":
-    print("test")
-    #start_aio()
+    #print("test")
+    start_aio()

@@ -1,6 +1,5 @@
 import asyncio
 from datetime import datetime
-
 import asyncpg
 import django
 from aiogram import Bot, Dispatcher, types
@@ -10,7 +9,6 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.types import ParseMode, ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery
 from aiogram.dispatcher import FSMContext
 import base64
-
 from aiogram.utils import executor
 from django.conf import settings
 import DJANGO_SETTING_MODULE
@@ -24,18 +22,40 @@ nest_asyncio.apply()
 settings.configure(DJANGO_SETTING_MODULE)
 django.setup()
 local = json.loads(open("locale.json", "r", encoding="utf-8").read())
-
+loop = asyncio.get_event_loop()#
 connection = None
 async def conn():
     print("connect to db...")
     global connection
     connection = await asyncpg.connect(dsn=config.DB_URI)
+    try:
+        await connection.execute("DROP TRIGGER IF EXISTS status_change_trigger ON users;")
+        print("Trigger removed successfully.")
+    except Exception as e:
+        print("Error removing trigger:", e)
+    trigger_query = """
+        CREATE OR REPLACE FUNCTION notify_status_change() RETURNS TRIGGER AS $$
+        BEGIN
+            IF OLD.status IS DISTINCT FROM NEW.status THEN
+                PERFORM pg_notify('status_change_channel', json_build_object('id', NEW.id, 'status', NEW.status, 'username', NEW.username)::text);
+            END IF;
+            RETURN NEW;
+        END;
+        $$ LANGUAGE plpgsql;
+        
+        CREATE TRIGGER status_change_trigger
+        AFTER UPDATE ON users
+        FOR EACH ROW
+        EXECUTE FUNCTION notify_status_change();
+        """
+    await connection.execute(trigger_query)
 
 bot = Bot(config.BOT_TOKEN)
 
 dp = Dispatcher(bot, storage=MemoryStorage())
 dp.middleware.setup(LoggingMiddleware())
 
+#Триггер для NOTIFY
 
 def getDP():
     return dp
@@ -70,6 +90,22 @@ async def start(message):
             return
     except Exception as err:
         print(f"Status err: {err}")
+
+#Уведомление о изменении статуса:
+
+async def status_check():
+    print("Start status")
+    while True:
+        async with connection.transaction():
+            await connection.add_listener('status_change_channel', on_notification)
+            print("Listening for notifications...")
+            await asyncio.Event().wait()
+
+async def on_notification(conn, pid, channel, payload):
+    await bot.send_message(1336672124, f"Received notification on channel '{channel}': {payload}")
+
+async def main():
+    await asyncio.gather(status_check())
 # ==== STATUS CHECK ====
 async def send_order_notification(user, response, pay_status):
     try:
@@ -239,7 +275,7 @@ async def message_handler(message):
         else:
             await bot.send_message(message.from_user.id, local['NotAllowed'])
 
-
-loop = asyncio.new_event_loop()
+#loop = asyncio.new_event_loop()
 result = loop.run_until_complete(conn())
+loop.run_until_complete(main())
 #executor.start_polling(dp, loop=loop, skip_updates=True)

@@ -25,5 +25,5 @@
   "StatusButton": "Статус",
   "Kvatance": "Квитанция: <i>$id</i>\nСумма: <i>$summa руб.</i>\n\n<b>Все верно?</b>",
   "PayURL": "Отлично!\n\n<i>$link</i>",
-  "OrderNotify": "Заявка $order_desc на сумму $amount RUB: $pay_status $url"
+  "OrderNotify": "Заявка $order_desc на сумму $amount RUB: $status\n$url"
 }

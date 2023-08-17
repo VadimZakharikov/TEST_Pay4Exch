@@ -73,7 +73,7 @@ async def start(message):
 # ==== STATUS CHECK ====
 async def send_order_notification(user, response, pay_status):
     try:
-        await bot.send_message(user['id'], f"Заявка {user['order_description']} на сумму {response['OrderInfo']['Amount'] / 100:.2f} RUB: {pay_status}\n{user['order_url']}")
+        await bot.send_message(user['id'], local['OrderNotify'].replace("$order_desc", user['order_description']).replace("$amount", f"{response['OrderInfo']['Amount'] / 100:.2f}").replace("$status", pay_status).replace("$url", user['order_url']))
     except Exception as err:
         print(err)
 async def status(user_id):
@@ -118,7 +118,7 @@ async def create_link(number, summ, desc, state, userid):
     parameters = dict(ExtID=number,
                       Amount=summ,
                       Description=desc,
-                      TTl=config.LIFE_TIME,
+                      TTl="4.00:00:00",
                       OrderId=number)
     signature = hmac.new(config.API_KEY.encode(), json.dumps(parameters, ensure_ascii=False).encode('utf-8'),
                          digestmod=hashlib.sha1).digest()
@@ -152,12 +152,10 @@ async def yes_callback(callback: CallbackQuery, state: FSMContext):
     await callback.answer(local['CallTrue'])
     async with state.proxy() as data:
         link = loop.run_until_complete(create_link(data['docnum'], float(data['price']) * 100, data['id'], state, data['user_id']))
-        await bot.send_message(callback.from_user.id,
-                           f"Отлично!\n\n<i>{link}</i>",
+        await bot.send_message(callback.from_user.id, local['PayURL'].replace("$link", link),
                            parse_mode="HTML",
-                           reply_markup=ReplyKeyboardMarkup(resize_keyboard=True).add("Оплатить", "Статус"))
+                           reply_markup=ReplyKeyboardMarkup(resize_keyboard=True).add(local['PayButton'], local['StatusButton']))
     await state.finish()
-    print("asd")
     return
 
 async def no_callback(callback: CallbackQuery, state: FSMContext):
@@ -190,7 +188,7 @@ async def getID(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data['id'] = message.text
     await Form.next()
-    await message.reply(local['GetOrderPrice'])
+    await bot.send_message(message.from_user.id, local['GetOrderPrice'])
 
 
 voc = "абвгдийклмнопрстуфхцчшщъыьэюяabcdefghijklmnopqrstuvwxyz"
@@ -219,7 +217,7 @@ async def getPrice(message, state):
             data['user_id'] = message.from_user.id
             data['price'] = summa
             await bot.send_message(message.from_user.id,
-                                   f"Квитанция: <i>{data['id']}</i>\nСумма: <i>{summa:.2f} руб.</i>\n\n<b>Все верно?</b>",
+                                   f"{local['Kvatance'].replace('$id', data['id']).replace('$summa', f'{summa:.2f}')}",
                                    parse_mode="HTML", reply_markup=InlineKeyboardMarkup().add(btn1, btn2))
     except ValueError:
         await Form.price.set()
@@ -244,4 +242,4 @@ async def message_handler(message):
 
 loop = asyncio.new_event_loop()
 result = loop.run_until_complete(conn())
-#executor.start_polling(dp, loop=loop, skip_updates=True)
+executor.start_polling(dp, loop=loop, skip_updates=True)

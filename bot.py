@@ -1,4 +1,5 @@
 import asyncio
+import multiprocessing
 from datetime import datetime
 import asyncpg
 import django
@@ -18,6 +19,7 @@ import hmac
 import json
 import requests
 import nest_asyncio
+
 nest_asyncio.apply()
 settings.configure(DJANGO_SETTING_MODULE)
 django.setup()
@@ -49,7 +51,6 @@ async def conn():
         EXECUTE FUNCTION notify_status_change();
         """
     await connection.execute(trigger_query)
-
 bot = Bot(config.BOT_TOKEN)
 
 dp = Dispatcher(bot, storage=MemoryStorage())
@@ -95,17 +96,22 @@ async def start(message):
 
 async def status_check():
     print("Start status")
+    connection = await asyncpg.connect(dsn=config.DB_URI)
     while True:
-        async with connection.transaction():
+        try:
             await connection.add_listener('status_change_channel', on_notification)
             print("Listening for notifications...")
             await asyncio.Event().wait()
-
+        finally:
+            await connection.close()
 async def on_notification(conn, pid, channel, payload):
-    await bot.send_message(1336672124, f"Received notification on channel '{channel}': {payload}")
-
-async def main():
-    await asyncio.gather(status_check())
+    data = json.loads(payload)
+    user_id = data['id']
+    username = data['username']
+    new_status = data['status']
+    await bot.send_message(user_id, f"Ваш статус изменен на: {new_status}")
+def main():
+    asyncio.run(status_check())
 # ==== STATUS CHECK ====
 async def send_order_notification(user, response, pay_status):
     try:
@@ -275,7 +281,7 @@ async def message_handler(message):
         else:
             await bot.send_message(message.from_user.id, local['NotAllowed'])
 
-#loop = asyncio.new_event_loop()
-result = loop.run_until_complete(conn())
-loop.run_until_complete(main())
+def start_all():
+    loop.run_until_complete(conn())
+    multiprocessing.Process(target=main).start()
 #executor.start_polling(dp, loop=loop, skip_updates=True)

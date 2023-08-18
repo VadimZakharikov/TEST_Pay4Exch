@@ -110,7 +110,7 @@ async def on_notification(conn, pid, channel, payload):
     username = data['username']
     new_status = data['status']
     await bot.send_message(user_id, f"Ваш статус изменен на: {new_status}")
-def main():
+def main_a():
     asyncio.run(status_check())
 # ==== STATUS CHECK ====
 async def send_order_notification(user, response, pay_status):
@@ -283,7 +283,7 @@ async def message_handler(message):
 
 def start_all():
     loop.run_until_complete(conn())
-    #multiprocessing.Process(target=main).start()
+    multiprocessing.Process(target=main_a).start()
     #executor.start_polling(dp, loop=loop, skip_updates=True)
 
 #start_all()

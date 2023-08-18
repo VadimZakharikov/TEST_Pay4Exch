@@ -283,6 +283,7 @@ async def message_handler(message):
 
 def start_all():
     loop.run_until_complete(conn())
+    print("starting listen...")
     multiprocessing.Process(target=main_a).start()
     #executor.start_polling(dp, loop=loop, skip_updates=True)
 

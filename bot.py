@@ -96,14 +96,14 @@ async def start(message):
 
 async def status_check():
     print("Start status")
-    connection = await asyncpg.connect(dsn=config.DB_URI)
+    connect = await asyncpg.connect(dsn=config.DB_URI)
     while True:
         try:
-            await connection.add_listener('status_change_channel', on_notification)
+            await connect.add_listener('status_change_channel', on_notification)
             print("Listening for notifications...")
             await asyncio.Event().wait()
-        finally:
-            await connection.close()
+        except Exception as err:
+            print("error on status_check func: ", err)
 async def on_notification(conn, pid, channel, payload):
     data = json.loads(payload)
     user_id = data['id']

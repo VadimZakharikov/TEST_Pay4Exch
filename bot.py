@@ -93,26 +93,26 @@ async def start(message):
         print(f"Status err: {err}")
 
 #Уведомление о изменении статуса:
-
-async def status_check():
+async def status_check(connection_params):
     print("Start status")
-    connect = await asyncpg.connect(dsn=config.DB_URI)
-    event = asyncio.Event()
-    
+    connect = await asyncpg.connect(**connection_params)
     try:
         await connect.add_listener('status_change_channel', on_notification)
         print("Listening for notifications...")
-        await event.wait()
+        await asyncio.Event().wait()
     except Exception as err:
         print("error on status_check func: ", err)
+    finally:
+        await connect.close()
+
 async def on_notification(conn, pid, channel, payload):
     data = json.loads(payload)
     user_id = data['id']
     username = data['username']
     new_status = data['status']
     await bot.send_message(user_id, f"Ваш статус изменен на: {new_status}")
-def main_a():
-    asyncio.run(status_check())
+def main_a(connection_params):
+    asyncio.run(status_check(connection_params))
 # ==== STATUS CHECK ====
 async def send_order_notification(user, response, pay_status):
     try:
@@ -283,9 +283,12 @@ async def message_handler(message):
             await bot.send_message(message.from_user.id, local['NotAllowed'])
 
 def start_all():
+    connection_params = {
+        'dsn': config.DB_URI
+    }
     loop.run_until_complete(conn())
     print("starting listen...")
-    multiprocessing.Process(target=main_a).start()
+    multiprocessing.Process(target=main_a, args=(connection_params,)).start()
     #executor.start_polling(dp, loop=loop, skip_updates=True)
 
 #start_all()

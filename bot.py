@@ -95,12 +95,14 @@ async def start(message):
 #Уведомление о изменении статуса:
 async def status_check(connection_params):
     print("Start status")
-    async with asyncpg.create_pool(**connection_params) as pool:
-        async with pool.acquire() as connect:
-            await connect.add_listener('status_change_channel', on_notification)
-            print("Listening for notifications...")
-            while True:
-                await asyncio.Event().wait()
+    connection = await asyncpg.connect(**connection_params)
+    try:
+        await connection.add_listener('status_change_channel', on_notification)
+        print("Listening for notifications...")
+        while True:
+            await asyncio.Event().wait()
+    finally:
+        await connection.close()
 
 async def on_notification(conn, pid, channel, payload):
     data = json.loads(payload)

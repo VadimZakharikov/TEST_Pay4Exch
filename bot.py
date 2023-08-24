@@ -288,8 +288,8 @@ def start_all():
         'dsn': config.DB_URI
     }
     loop.run_until_complete(conn())
-    print("starting listen...")
-    multiprocessing.Process(target=main_a, args=(connection_params,)).start()
+    #print("starting listen...")
+    #multiprocessing.Process(target=main_a, args=(connection_params,)).start()
     #executor.start_polling(dp, loop=loop, skip_updates=True)
 
 #start_all()

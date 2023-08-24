@@ -215,6 +215,7 @@ dp.register_callback_query_handler(no_callback, lambda c: c.data == "no", state=
 # ==================
 def docnum():
     return str(datetime.utcnow()).replace("-", "").replace(":", "").replace(" ", "").replace(".", "")
+
 #Проверка статуса человека и возврат значения True/False в зависимости от статуса в БД. При True - доступ рарешен, при False - нет.
 async def check(userid):
     res = loop.run_until_complete(connection.fetchrow(f"select status from users where id = {userid}"))

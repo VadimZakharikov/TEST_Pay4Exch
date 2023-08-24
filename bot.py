@@ -25,8 +25,10 @@ settings.configure(DJANGO_SETTING_MODULE)
 django.setup()
 local = json.loads(open("locale.json", "r", encoding="utf-8").read())
 loop = asyncio.get_event_loop()#
+connection = None
 async def conn():
     print("connect to db...")
+    global connection
     connection = await asyncpg.connect(dsn=config.DB_URI)
     try:
         await connection.execute("DROP TRIGGER IF EXISTS status_change_trigger ON users;")
@@ -76,7 +78,7 @@ async def start(message):
         if result is None:
             await connection.execute("INSERT INTO users(id, username, status, comment) VALUES ($1, $2, $3, $4)",
                                id, username, None, '')
-        
+
         result = loop.run_until_complete(connection.fetchrow(f"SELECT status, id FROM users WHERE id = {id}"))
         await connection.close()
         if result['status'] is None:

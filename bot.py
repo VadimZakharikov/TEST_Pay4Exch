@@ -100,10 +100,11 @@ async def status_check(connection_params):
     connect = await asyncpg.connect(config.DB_URI)
     print(connect)
     try:
+        event = await asyncio.Event()
         await connect.add_listener('status_change_channel', on_notification)
         print("Listening for notifications...")
         while True:
-            await asyncio.Event().wait()
+            await event.wait()
     finally:
         await connect.close()
 
